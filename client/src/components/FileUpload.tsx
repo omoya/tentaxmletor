@@ -95,7 +95,7 @@ export function FileUpload() {
           xmlContent += "    <sangria>0</sangria> ";
           xmlContent += "    <font>basica</font> ";
           xmlContent += "    <size>0</size> ";
-          xmlContent += `    <gratis="${index < freeParagraphs ? 1 : 0}" `;
+          xmlContent += `    <gratis="${index < freeParagraphs ? 1 : 0}"> `;
           xmlContent += "    <img>0</img> ";
           xmlContent += `    <bloque>${segment}</bloque> `;
           xmlContent += "  </parrafo>\n";
