@@ -21,102 +21,92 @@ export function FileUpload() {
   const [author, setAuthor] = useState("");
   const { toast } = useToast();
 
-  const generateXMLForIOS = (paragraphs: NodeListOf<Element>, title: string, author: string) => {
+  const generateXMLForIOS = (
+    paragraphs: NodeListOf<Element>,
+    title: string,
+    author: string
+  ) => {
     let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xmlContent += `<relato titulo="${title}" autor="${author}">\n`;
+    xmlContent += `<relato>\n`;
+    xmlContent += `  <datos titulo="${title}" autor="${author}"></datos>\n`;
 
     paragraphs.forEach((p) => {
       let text = p.innerHTML;
       // Remove strong tags
-      text = text.replace(/<\/?strong>/g, '');
+      text = text.replace(/<\/?strong>/g, "");
       // Replace <i> and <em> tags with iOS format
-      text = text.replace(/<(i|em)>(.*?)<\/(i|em)>/g, ' *SL* $2 *SL* ');
+      text = text.replace(/<(i|em)>(.*?)<\/(i|em)>/g, " *C* $2 *C* ");
 
       // Handle empty paragraphs and normal text
       if (text.trim() === "[[EMPTY_PARAGRAPH]]") {
-        xmlContent += '  <parrafo>\n';
-        xmlContent += '    <just>i</just>\n';
-        xmlContent += '    <cap>0</cap>\n';
-        xmlContent += '    <saltolinea>0</saltolinea>\n';
-        xmlContent += '    <sangria>0</sangria>\n';
-        xmlContent += '    <font>basica</font>\n';
-        xmlContent += '    <size>0</size>\n';
-        xmlContent += '    <gratis>0</gratis>\n';
-        xmlContent += '    <img>0</img>\n';
-        xmlContent += '    <bloque> *SL* </bloque>\n';
-        xmlContent += '  </parrafo>\n';
+        xmlContent +=
+          '  <parrafo just="i" cap="0" saltolinea="0" sangria="1" font="basica" size="0" gratis="1" img="0" bloque=" *C* "></parrafo>\n';
       } else {
         const segment = text.trim();
-        if (segment !== '') {
-          xmlContent += '  <parrafo>\n';
-          xmlContent += '    <just>i</just>\n';
-          xmlContent += '    <cap>0</cap>\n';
-          xmlContent += '    <saltolinea>0</saltolinea>\n';
-          xmlContent += '    <sangria>0</sangria>\n';
-          xmlContent += '    <font>basica</font>\n';
-          xmlContent += '    <size>0</size>\n';
-          xmlContent += '    <gratis>0</gratis>\n';
-          xmlContent += '    <img>0</img>\n';
-          xmlContent += `    <bloque>${segment}</bloque>\n`;
-          xmlContent += '  </parrafo>\n';
+        if (segment !== "") {
+          xmlContent += `  <parrafo just="i" cap="0" saltolinea="0" sangria="1" font="basica" size="0" gratis="1" img="0" bloque="${segment}"></parrafo>\n`;
         }
       }
     });
 
-    xmlContent += '</relato>';
+    xmlContent += "</relato>";
     return xmlContent;
   };
 
-  const generateXMLForAndroid = (paragraphs: NodeListOf<Element>, title: string, author: string) => {
+  const generateXMLForAndroid = (
+    paragraphs: NodeListOf<Element>,
+    title: string,
+    author: string
+  ) => {
     let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xmlContent += `<relato titulo="${title}" autor="${author}">\n`;
 
     paragraphs.forEach((p) => {
       let text = p.innerHTML;
       // Remove strong tags
-      text = text.replace(/<\/?strong>/g, '');
+      text = text.replace(/<\/?strong>/g, "");
       // Replace <i> and <em> tags with Android format
-      text = text.replace(/<(i|em)>(.*?)<\/(i|em)>/g, '*C*$2*C*');
+      text = text.replace(/<(i|em)>(.*?)<\/(i|em)>/g, "*C*$2*C*");
 
       // Handle empty paragraphs and normal text
       if (text.trim() === "[[EMPTY_PARAGRAPH]]") {
-        xmlContent += '  <parrafo>\n';
-        xmlContent += '    <just>i</just>\n';
-        xmlContent += '    <cap>0</cap>\n';
-        xmlContent += '    <saltolinea>0</saltolinea>\n';
-        xmlContent += '    <sangria>0</sangria>\n';
-        xmlContent += '    <font>basica</font>\n';
-        xmlContent += '    <size>0</size>\n';
-        xmlContent += '    <gratis>0</gratis>\n';
-        xmlContent += '    <img>0</img>\n';
-        xmlContent += '    <bloque> *SL* </bloque>\n';
-        xmlContent += '  </parrafo>\n';
+        xmlContent += "  <parrafo> ";
+        xmlContent += "    <just>i</just> ";
+        xmlContent += "    <cap>0</cap> ";
+        xmlContent += "    <saltolinea>0</saltolinea> ";
+        xmlContent += "    <sangria>0</sangria> ";
+        xmlContent += "    <font>basica</font> ";
+        xmlContent += "    <size>0</size> ";
+        xmlContent += "    <gratis>0</gratis> ";
+        xmlContent += "    <img>0</img> ";
+        xmlContent += "    <bloque> *SL* </bloque> ";
+        xmlContent += "  </parrafo>\n";
       } else {
         const segment = text.trim();
-        if (segment !== '') {
-          xmlContent += '  <parrafo>\n';
-          xmlContent += '    <just>i</just>\n';
-          xmlContent += '    <cap>0</cap>\n';
-          xmlContent += '    <saltolinea>0</saltolinea>\n';
-          xmlContent += '    <sangria>0</sangria>\n';
-          xmlContent += '    <font>basica</font>\n';
-          xmlContent += '    <size>0</size>\n';
-          xmlContent += '    <gratis>0</gratis>\n';
-          xmlContent += '    <img>0</img>\n';
-          xmlContent += `    <bloque>${segment}</bloque>\n`;
-          xmlContent += '  </parrafo>\n';
+        if (segment !== "") {
+          xmlContent += "  <parrafo> ";
+          xmlContent += "    <just>i</just> ";
+          xmlContent += "    <cap>0</cap> ";
+          xmlContent += "    <saltolinea>0</saltolinea> ";
+          xmlContent += "    <sangria>0</sangria> ";
+          xmlContent += "    <font>basica</font> ";
+          xmlContent += "    <size>0</size> ";
+          xmlContent += "    <gratis>0</gratis> ";
+          xmlContent += "    <img>0</img> ";
+          xmlContent += `    <bloque>${segment}</bloque> `;
+          xmlContent += "  </parrafo>\n";
         }
       }
     });
 
-    xmlContent += '</relato>';
+    xmlContent += "</relato>";
     return xmlContent;
   };
 
   const downloadXML = (xmlContent: string, platform: string) => {
-    const blob = new Blob([xmlContent], { type: 'application/xml' });
+    const blob = new Blob([xmlContent], { type: "application/xml" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `converted_${platform.toLowerCase()}.xml`;
     document.body.appendChild(a);
@@ -130,13 +120,15 @@ export function FileUpload() {
     if (match) {
       return {
         title: match[1],
-        author: match[2]
+        author: match[2],
       };
     }
     return null;
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -145,64 +137,44 @@ export function FileUpload() {
       setTitle(parsed.title);
       setAuthor(parsed.author);
     }
-    if (!file) return;
 
     try {
       setStage("converting");
 
       const arrayBuffer = await file.arrayBuffer();
-      const result = await mammoth.convertToHtml({ 
-        arrayBuffer,
-        styleMap: [
-          "p[style-name='center'] => center",
-          "p[style-name='Heading 1'] => h1:fresh",
-          "p[style-name='Heading 2'] => h2:fresh",
-          "p[style-name='Heading 3'] => h3:fresh",
-          "p[style-name='Heading 4'] => h4:fresh",
-          "p[style-name='Heading 5'] => h5:fresh",
-          "p[style-name='Heading 6'] => h6:fresh",
-          "p:empty => p.empty-paragraph"
-        ],
-        ignoreEmptyParagraphs: false,
-        preserveEmptyParagraphs: true,
-        transformDocument: (element) => {
-          if (element.type === "paragraph") {
-            const isEmpty = !element.children?.length || 
-                          element.children.every(child => 
-                            !child.value || 
-                            child.value.trim() === "" || 
-                            child.value === "\u00A0" || 
-                            child.value === "&nbsp;");
-            
-            if (isEmpty) {
-              return { ...element, children: [{ type: "text", value: "[[EMPTY_PARAGRAPH]]" }] };
-            }
-          }
-          return element;
-        }
-      });
+      const result = await mammoth.convertToHtml({ arrayBuffer });
       const parser = new DOMParser();
-      const doc = parser.parseFromString(result.value, 'text/html');
-      const paragraphs = doc.querySelectorAll('p');
+      const doc = parser.parseFromString(result.value, "text/html");
+      const paragraphs = doc.querySelectorAll("p");
 
-      const iosXML = generateXMLForIOS(paragraphs, title, author);
-      const androidXML = generateXMLForAndroid(paragraphs, title, author);
+      const iosXML = generateXMLForIOS(
+        paragraphs,
+        parsed?.title || title,
+        parsed?.author || author
+      );
+      const androidXML = generateXMLForAndroid(
+        paragraphs,
+        parsed?.title || title,
+        parsed?.author || author
+      );
 
-      downloadXML(iosXML, 'iOS');
+      downloadXML(iosXML, "iOS");
       setTimeout(() => {
-        downloadXML(androidXML, 'Android');
+        downloadXML(androidXML, "Android");
       }, 500);
 
       setStage("complete");
       toast({
         title: "¡Éxito!",
-        description: "Sus archivos XML han sido generados y descargados para iOS y Android.",
+        description:
+          "Sus archivos XML han sido generados y descargados para iOS y Android.",
       });
     } catch (error) {
       setStage("error");
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to convert file",
+        description:
+          error instanceof Error ? error.message : "Failed to convert file",
         variant: "destructive",
       });
     }
@@ -241,8 +213,10 @@ export function FileUpload() {
         </div>
       </div>
 
-      <div 
-        className={`border-2 border-dashed rounded-lg p-8 transition-colors duration-200 ease-in-out ${stage === "converting" ? 'opacity-50' : ''} hover:border-primary hover:bg-primary/5`}
+      <div
+        className={`border-2 border-dashed rounded-lg p-8 transition-colors duration-200 ease-in-out ${
+          stage === "converting" ? "opacity-50" : ""
+        } hover:border-primary hover:bg-primary/5`}
         onDragOver={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -251,8 +225,21 @@ export function FileUpload() {
           e.preventDefault();
           e.stopPropagation();
           const file = e.dataTransfer.files[0];
-          if (file && file.name.endsWith('.docx')) {
-            const event = { target: { files: [file] } } as React.ChangeEvent<HTMLInputElement>;
+          if (file && file.name.endsWith(".docx")) {
+            const event = {
+              target: { files: [file] },
+              currentTarget: { files: [file] },
+              preventDefault: () => {},
+              stopPropagation: () => {},
+              nativeEvent: {} as Event,
+              bubbles: false,
+              cancelable: false,
+              defaultPrevented: false,
+              eventPhase: 0,
+              isTrusted: true,
+              timeStamp: Date.now(),
+              type: "change",
+            } as unknown as React.ChangeEvent<HTMLInputElement>;
             await handleFileChange(event);
           } else {
             toast({
@@ -263,8 +250,8 @@ export function FileUpload() {
           }
         }}
       >
-        <label 
-          htmlFor="file-upload" 
+        <label
+          htmlFor="file-upload"
           className="flex flex-col items-center justify-center space-y-4 text-center cursor-pointer"
         >
           <Upload className="w-12 h-12 text-muted-foreground" />
