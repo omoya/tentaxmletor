@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import mammoth from "mammoth";
+import { TextField } from "@mui/material";
 
 type ConversionStage = "idle" | "converting" | "complete" | "error";
 
@@ -19,6 +20,7 @@ export function FileUpload() {
   const [stage, setStage] = useState<ConversionStage>("idle");
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
+  const [freeParagraphs, setFreeParagraphs] = useState(5);
   const { toast } = useToast();
 
   const generateXMLForIOS = (
@@ -30,7 +32,7 @@ export function FileUpload() {
     xmlContent += `<relato>\n`;
     xmlContent += `  <datos titulo="${title}" autor="${author}"></datos>\n`;
 
-    paragraphs.forEach((p) => {
+    paragraphs.forEach((p, index) => {
       let text = p.innerHTML;
       // Remove strong tags
       text = text.replace(/<\/?strong>/g, "");
@@ -44,7 +46,9 @@ export function FileUpload() {
       } else {
         const segment = text.trim();
         if (segment !== "") {
-          xmlContent += `  <parrafo just="i" cap="0" saltolinea="0" sangria="1" font="basica" size="0" gratis="1" img="0" bloque="${segment}"></parrafo>\n`;
+          xmlContent += `  <parrafo just="i" cap="0" saltolinea="0" sangria="1" font="basica" size="0" gratis="${
+            index < freeParagraphs ? 1 : 0
+          }" img="0" bloque="${segment}"></parrafo>\n`;
         }
       }
     });
@@ -61,7 +65,7 @@ export function FileUpload() {
     let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xmlContent += `<relato titulo="${title}" autor="${author}">\n`;
 
-    paragraphs.forEach((p) => {
+    paragraphs.forEach((p, index) => {
       let text = p.innerHTML;
       // Remove strong tags
       text = text.replace(/<\/?strong>/g, "");
@@ -91,7 +95,7 @@ export function FileUpload() {
           xmlContent += "    <sangria>0</sangria> ";
           xmlContent += "    <font>basica</font> ";
           xmlContent += "    <size>0</size> ";
-          xmlContent += "    <gratis>0</gratis> ";
+          xmlContent += `    <gratis="${index < freeParagraphs ? 1 : 0}" `;
           xmlContent += "    <img>0</img> ";
           xmlContent += `    <bloque>${segment}</bloque> `;
           xmlContent += "  </parrafo>\n";
@@ -209,6 +213,16 @@ export function FileUpload() {
             placeholder="Introduce el nombre del autor"
             value={author}
             onChange={(e) => setAuthor(e.target.value)}
+          />
+        </div>
+        <div className="mt-4">
+          <TextField
+            type="number"
+            label="Número de párrafos gratis"
+            value={freeParagraphs}
+            onChange={(e) => setFreeParagraphs(Number(e.target.value))}
+            fullWidth
+            inputProps={{ min: 1, max: 10 }}
           />
         </div>
       </div>
