@@ -75,27 +75,27 @@ export function FileUpload() {
       // Handle empty paragraphs and normal text
       if (text.trim() === "[[EMPTY_PARAGRAPH]]") {
         xmlContent += "  <parrafo> ";
-        xmlContent += "    <just>i</just> ";
-        xmlContent += "    <cap>0</cap> ";
-        xmlContent += "    <saltolinea>0</saltolinea> ";
-        xmlContent += "    <sangria>0</sangria> ";
-        xmlContent += "    <font>basica</font> ";
-        xmlContent += "    <size>0</size> ";
-        xmlContent += "    <gratis>0</gratis> ";
-        xmlContent += "    <img>0</img> ";
-        xmlContent += "    <bloque> *SL* </bloque> ";
-        xmlContent += "  </parrafo>\n";
+        xmlContent += "<just>i</just> ";
+        xmlContent += "<cap>0</cap> ";
+        xmlContent += "<saltolinea>0</saltolinea> ";
+        xmlContent += "<sangria>0</sangria> ";
+        xmlContent += "<font>basica</font> ";
+        xmlContent += "<size>0</size> ";
+        xmlContent += "<gratis>0</gratis> ";
+        xmlContent += "<img>0</img> ";
+        xmlContent += "<bloque> *SL* </bloque> ";
+        xmlContent += "</parrafo>\n";
       } else {
         const segment = text.trim();
         if (segment !== "") {
           xmlContent += "  <parrafo> ";
-          xmlContent += "    <just>i</just> ";
-          xmlContent += "    <cap>0</cap> ";
-          xmlContent += "    <saltolinea>0</saltolinea> ";
-          xmlContent += "    <sangria>0</sangria> ";
-          xmlContent += "    <font>basica</font> ";
-          xmlContent += "    <size>0</size> ";
-          xmlContent += `    <gratis="${index < freeParagraphs ? 1 : 0}"> `;
+          xmlContent += "<just>i</just> ";
+          xmlContent += "<cap>0</cap> ";
+          xmlContent += "<saltolinea>0</saltolinea> ";
+          xmlContent += "<sangria>0</sangria> ";
+          xmlContent += "<font>basica</font> ";
+          xmlContent += "<size>0</size> ";
+          xmlContent += `<gratis>${index < freeParagraphs ? 1 : 0}</gratis> `;
           xmlContent += "    <img>0</img> ";
           xmlContent += `    <bloque>${segment}</bloque> `;
           xmlContent += "  </parrafo>\n";
