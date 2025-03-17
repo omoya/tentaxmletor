@@ -81,6 +81,10 @@ export default function Home() {
                       formato: titulo -- autor.docx.
                     </p>
                     <p className="text-sm text-gray-500">
+                      • Indica el número de párrafos que se marcaran como de
+                      acceso libre.
+                    </p>
+                    <p className="text-sm text-gray-500">
                       • Se descargarán automáticamente dos XMLs, uno con el
                       formato para iOS, otro el de Android.
                     </p>
