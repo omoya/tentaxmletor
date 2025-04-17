@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Upload, CheckCircle, AlertCircle } from "lucide-react";
+import { Upload, CheckCircle, AlertCircle, Files } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import mammoth from "mammoth";
 import { TextField } from "@mui/material";
+import JSZip from "jszip";
 
 type ConversionStage = "idle" | "converting" | "complete" | "error";
 
@@ -107,18 +108,6 @@ export function FileUpload() {
     return xmlContent;
   };
 
-  const downloadXML = (xmlContent: string, platform: string) => {
-    const blob = new Blob([xmlContent], { type: "application/xml" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `converted_${platform.toLowerCase()}.xml`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
-
   const parseFileName = (fileName: string) => {
     const match = fileName.match(/^(.+)--(.+)\.docx$/);
     if (match) {
@@ -137,6 +126,7 @@ export function FileUpload() {
     if (!file) return;
 
     const parsed = parseFileName(file.name);
+    const originalFileName = file.name.replace(/\.[^/.]+$/, ""); // Remove the file extension
     if (parsed) {
       setTitle(parsed.title);
       setAuthor(parsed.author);
@@ -162,16 +152,26 @@ export function FileUpload() {
         parsed?.author || author
       );
 
-      downloadXML(iosXML, "iOS");
-      setTimeout(() => {
-        downloadXML(androidXML, "Android");
-      }, 500);
+      // Create a ZIP file
+      const zip = new JSZip();
+      zip.file(`ios_${originalFileName}.xml`, iosXML);
+      zip.file(`android_${originalFileName}.xml`, androidXML);
+
+      // Generate the ZIP file and trigger download
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const zipUrl = window.URL.createObjectURL(zipBlob);
+      const a = document.createElement("a");
+      a.href = zipUrl;
+      a.download = `converted_files_${originalFileName}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(zipUrl);
 
       setStage("complete");
       toast({
         title: "¡Éxito!",
-        description:
-          "Sus archivos XML han sido generados y descargados para iOS y Android.",
+        description: `Sus archivos XML han sido generados y descargados en un archivo ZIP.`,
       });
     } catch (error) {
       setStage("error");
@@ -182,6 +182,121 @@ export function FileUpload() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleMultipleFilesChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    try {
+      setStage("converting");
+
+      const zip = new JSZip();
+
+      for (const file of Array.from(files)) {
+        const originalFileName = file.name.replace(/\.[^/.]+$/, ""); // Remove the file extension
+        const parsed = parseFileName(file.name); // Parse the file name for title and author
+
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.convertToHtml({ arrayBuffer });
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(result.value, "text/html");
+        const paragraphs = doc.querySelectorAll("p");
+
+        const iosXML = generateXMLForIOS(
+          paragraphs,
+          parsed?.title || originalFileName, // Use parsed title or fallback to file name
+          parsed?.author || "" // Use parsed author or fallback to empty string
+        );
+        const androidXML = generateXMLForAndroid(
+          paragraphs,
+          parsed?.title || originalFileName,
+          parsed?.author || ""
+        );
+
+        zip.file(`ios_${originalFileName}.xml`, iosXML);
+        zip.file(`android_${originalFileName}.xml`, androidXML);
+      }
+
+      // Generate the ZIP file and trigger download
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const zipUrl = window.URL.createObjectURL(zipBlob);
+      const a = document.createElement("a");
+      a.href = zipUrl;
+      a.download = `converted_files.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(zipUrl);
+
+      setStage("complete");
+      toast({
+        title: "¡Éxito!",
+        description: `Los archivos XML han sido generados y descargados en un archivo ZIP.`,
+      });
+    } catch (error) {
+      setStage("error");
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to convert files",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDrop = async (files: FileList) => {
+    if (!files || files.length === 0) return;
+
+    if (files.length === 1) {
+      // Single file upload
+      const event = {
+        target: { files },
+        currentTarget: { files },
+        preventDefault: () => {},
+        stopPropagation: () => {},
+        nativeEvent: {} as Event,
+        bubbles: false,
+        cancelable: false,
+        defaultPrevented: false,
+        eventPhase: 0,
+        isTrusted: true,
+        timeStamp: Date.now(),
+        type: "change",
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
+      await handleFileChange(event);
+    } else {
+      // Multiple file upload
+      const event = {
+        target: { files },
+        currentTarget: { files },
+        preventDefault: () => {},
+        stopPropagation: () => {},
+        nativeEvent: {} as Event,
+        bubbles: false,
+        cancelable: false,
+        defaultPrevented: false,
+        eventPhase: 0,
+        isTrusted: true,
+        timeStamp: Date.now(),
+        type: "change",
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
+      await handleMultipleFilesChange(event);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDropEvent = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const files = e.dataTransfer.files;
+    handleDrop(files);
   };
 
   const getStageMessage = (stage: ConversionStage) => {
@@ -196,6 +311,7 @@ export function FileUpload() {
 
   return (
     <div className="space-y-6">
+      {/* Single File Upload */}
       <div className="grid gap-4">
         <div className="grid gap-2">
           <Label htmlFor="title">Título</Label>
@@ -227,42 +343,13 @@ export function FileUpload() {
         </div>
       </div>
 
+      {/* Single File Upload Drop Zone */}
       <div
         className={`border-2 border-dashed rounded-lg p-8 transition-colors duration-200 ease-in-out ${
           stage === "converting" ? "opacity-50" : ""
         } hover:border-primary hover:bg-primary/5`}
-        onDragOver={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-        onDrop={async (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const file = e.dataTransfer.files[0];
-          if (file && file.name.endsWith(".docx")) {
-            const event = {
-              target: { files: [file] },
-              currentTarget: { files: [file] },
-              preventDefault: () => {},
-              stopPropagation: () => {},
-              nativeEvent: {} as Event,
-              bubbles: false,
-              cancelable: false,
-              defaultPrevented: false,
-              eventPhase: 0,
-              isTrusted: true,
-              timeStamp: Date.now(),
-              type: "change",
-            } as unknown as React.ChangeEvent<HTMLInputElement>;
-            await handleFileChange(event);
-          } else {
-            toast({
-              title: "Error",
-              description: "Por favor, sube solo archivos .docx",
-              variant: "destructive",
-            });
-          }
-        }}
+        onDragOver={handleDragOver}
+        onDrop={handleDropEvent}
       >
         <label
           htmlFor="file-upload"
@@ -281,6 +368,39 @@ export function FileUpload() {
             disabled={stage === "converting"}
           />
         </label>
+      </div>
+
+      {/* Multiple File Upload Drop Zone */}
+      <div
+        className={`border-2 border-dashed rounded-lg p-8 transition-colors duration-200 ease-in-out ${
+          stage === "converting" ? "opacity-50" : ""
+        } hover:border-primary hover:bg-primary/5`}
+        onDragOver={handleDragOver}
+        onDrop={handleDropEvent}
+      >
+        <label
+          htmlFor="multi-file-upload"
+          className="flex flex-col items-center justify-center space-y-4 text-center cursor-pointer"
+        >
+          <Files className="w-12 h-12 text-muted-foreground" />{" "}
+          {/* Use the Files icon */}
+          <span className="text-sm font-medium">
+            Arrastra y suelta o haz clic para seleccionar varios archivos .docx
+          </span>
+          <p className="text-sm text-gray-500">
+            Puedes subir varios archivos .docx para convertirlos. El número de
+            párrafos gratis se aplicará a todos los archivos.
+          </p>
+        </label>
+        <input
+          type="file"
+          accept=".docx"
+          multiple
+          onChange={handleMultipleFilesChange}
+          className="hidden"
+          id="multi-file-upload"
+          disabled={stage === "converting"}
+        />
       </div>
 
       {stage !== "idle" && (

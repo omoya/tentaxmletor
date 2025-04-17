@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { FileUpload } from "@/components/FileUpload";
 import { Dialog, Transition } from "@headlessui/react";
 import InfoIcon from "@mui/icons-material/Info";
-import { TextField } from "@mui/material";
+import { CodeBracketSquareIcon } from "@heroicons/react/24/outline"; // Import an XML-like icon
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -19,16 +19,11 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted p-6">
       <div className="max-w-2xl mx-auto">
-        <div className="mb-8 text-center">
+        <div className="mb-8 text-center flex items-center justify-center space-x-4">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-4">
             Tentaxmletor
           </h1>
-          <p className="text-muted-foreground">
-            Sube un archivo .docx para convertirlo a documentos XML.
-          </p>
-          <button onClick={openModal} className="text-muted-foreground">
-            <InfoIcon className="w-6 h-6 inline-block" />
-          </button>
+          <CodeBracketSquareIcon className="w-12 h-12 text-primary" />
         </div>
 
         <Card>
@@ -72,21 +67,29 @@ export default function Home() {
                   </Dialog.Title>
                   <div className="mt-2">
                     <p className="text-sm text-gray-500">
-                      • Sube un archivo docx en el que hayas puesto en cursiva
-                      los textos que te interese resaltar.
+                      • Sube un archivo .docx para convertirlo a documentos XML.
+                      El título y el autor se extraen automáticamente del nombre
+                      del archivo si sigue este formato:{" "}
+                      <strong>titulo -- autor.docx</strong>. Si no, puedes
+                      introducirlos manualmente.
                     </p>
                     <p className="text-sm text-gray-500">
-                      • El nombre del autor y título del relato se extraen
-                      automáticamente del nombre del archivo si sigue este
-                      formato: titulo -- autor.docx.
+                      • También puedes subir varios archivos .docx a la vez. El
+                      título y el autor se extraen automáticamente del nombre de
+                      cada archivo si sigue el formato{" "}
+                      <strong>titulo -- autor.docx</strong>. Si no, se usará el
+                      nombre del archivo como título y el autor quedará vacío.
                     </p>
                     <p className="text-sm text-gray-500">
-                      • Indica el número de párrafos que se marcaran como de
-                      acceso libre.
+                      • Indica el número de párrafos que se marcarán como de
+                      acceso libre. Este valor se aplicará a todos los archivos
+                      subidos.
                     </p>
                     <p className="text-sm text-gray-500">
-                      • Se descargarán automáticamente dos XMLs, uno con el
-                      formato para iOS, otro el de Android.
+                      • Se descargará automáticamente un archivo ZIP que
+                      contiene los documentos XML generados. Para cada archivo
+                      .docx subido, se generarán dos XMLs: uno con el formato
+                      para iOS y otro con el formato para Android.
                     </p>
                   </div>
 
