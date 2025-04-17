@@ -19,13 +19,27 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted p-6">
       <div className="max-w-2xl mx-auto">
-        <div className="mb-8 text-center flex items-center justify-center space-x-4">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-4">
-            Tentaxmletor
-          </h1>
-          <CodeBracketSquareIcon className="w-12 h-12 text-primary" />
+        {/* Title Section */}
+        <div className="mb-4 text-center">
+          <div className="flex items-center justify-center space-x-4">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Tentaxmletor
+            </h1>
+            <CodeBracketSquareIcon className="w-12 h-12 text-primary" />
+          </div>
+          {/* Information Icon */}
+          <div className="mt-2">
+            <button
+              onClick={openModal}
+              className="inline-flex items-center space-x-2 text-sm text-gray-500 hover:text-gray-700"
+            >
+              <InfoIcon className="w-5 h-5" />
+              <span>¿Cómo funciona?</span>
+            </button>
+          </div>
         </div>
 
+        {/* File Upload Section */}
         <Card>
           <CardContent className="p-6">
             <FileUpload />
@@ -33,6 +47,7 @@ export default function Home() {
         </Card>
       </div>
 
+      {/* Modal Section */}
       <Transition appear show={isModalOpen} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={closeModal}>
           <Transition.Child
@@ -73,6 +88,7 @@ export default function Home() {
                       <strong>titulo -- autor.docx</strong>. Si no, puedes
                       introducirlos manualmente.
                     </p>
+                    <br />
                     <p className="text-sm text-gray-500">
                       • También puedes subir varios archivos .docx a la vez. El
                       título y el autor se extraen automáticamente del nombre de
@@ -80,11 +96,13 @@ export default function Home() {
                       <strong>titulo -- autor.docx</strong>. Si no, se usará el
                       nombre del archivo como título y el autor quedará vacío.
                     </p>
+                    <br />
                     <p className="text-sm text-gray-500">
                       • Indica el número de párrafos que se marcarán como de
                       acceso libre. Este valor se aplicará a todos los archivos
                       subidos.
                     </p>
+                    <br />
                     <p className="text-sm text-gray-500">
                       • Se descargará automáticamente un archivo ZIP que
                       contiene los documentos XML generados. Para cada archivo
@@ -93,7 +111,7 @@ export default function Home() {
                     </p>
                   </div>
 
-                  <div className="mt-4">
+                  <div className="mt-4 text-right">
                     <button
                       type="button"
                       className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
