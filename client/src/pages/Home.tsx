@@ -21,7 +21,7 @@ export default function Home() {
       <div className="max-w-2xl mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-4">
-            Formatacle
+            Tentaxmletor
           </h1>
           <p className="text-muted-foreground">
             Sube un archivo .docx para convertirlo a documentos XML.
