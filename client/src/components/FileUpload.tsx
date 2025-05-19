@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import mammoth from "mammoth";
-import { TextField } from "@mui/material";
 import JSZip from "jszip";
 
 type ConversionStage = "idle" | "converting" | "complete" | "error";
@@ -21,7 +20,6 @@ export function FileUpload() {
   const [stage, setStage] = useState<ConversionStage>("idle");
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
-  const [freeParagraphs, setFreeParagraphs] = useState(5);
   const { toast } = useToast();
 
   const generateXMLForIOS = (
@@ -31,25 +29,48 @@ export function FileUpload() {
   ) => {
     let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xmlContent += `<relato>\n`;
-    xmlContent += `  <datos titulo="${title}" autor="${author}"></datos>\n`;
+    xmlContent += `  <datos titulo="${paragraphs[0].innerHTML}" autor="${paragraphs[1].innerHTML}"></datos>\n`;
+
+    //Start marking paragraphs as free
+    let gratis = 1;
 
     paragraphs.forEach((p, index) => {
+      if (index < 2) return; // Skip the first two paragraphs (title and author)
       let text = p.innerHTML;
+      // Remove double spaces
+      text = text.replace(/\s+/g, " ");
       // Remove strong tags
       text = text.replace(/<\/?strong>/g, "");
       // Replace <i> and <em> tags with iOS format
       text = text.replace(/<(i|em)>(.*?)<\/(i|em)>/g, " *C* $2 *C* ");
 
-      // Handle empty paragraphs and normal text
-      if (text.trim() === "[[EMPTY_PARAGRAPH]]") {
-        xmlContent +=
-          '  <parrafo just="i" cap="0" saltolinea="0" sangria="1" font="basica" size="0" gratis="1" img="0" bloque=" *C* "></parrafo>\n';
-      } else {
+      // Check if the text contains "GGG" and remove it
+      //if end of free text mark occurs, remove it and change the free paragraph to false
+      // This is a placeholder for the actual logic to determine if the paragraph is free
+      if (text.includes("***")) {
+        text = text.replace("***", "");
+        gratis = 0;
+      }
+
+      //Handle images (img nombre_imagen bloque)
+      const regex = /^img\s+(.+?)\s+(.+?)$/;
+      const match = text.match(regex);
+
+      if (match) {
+        xmlContent += `  <parrafo just="c" cap="0" saltolinea="2" sangria="0" font="imagen" size="0" gratis="${gratis.toString()}" img="${
+          match[1]
+        }" bloque="${match[2]}"></parrafo>\n`;
+      }
+
+      // Handle empty paragraphs
+      else if (text.trim() === "[[EMPTY_PARAGRAPH]]") {
+        xmlContent += `  <parrafo just="i" cap="0" saltolinea="0" sangria="1" font="basica" size="0" gratis="${gratis.toString()}" img="0" bloque=" *C* "></parrafo>\n`;
+      }
+      // Handle normal text
+      else {
         const segment = text.trim();
         if (segment !== "") {
-          xmlContent += `  <parrafo just="i" cap="0" saltolinea="0" sangria="1" font="basica" size="0" gratis="${
-            index < freeParagraphs ? 1 : 0
-          }" img="0" bloque="${segment}"></parrafo>\n`;
+          xmlContent += `  <parrafo just="i" cap="0" saltolinea="0" sangria="1" font="basica" size="0" gratis="${gratis.toString()}" img="0" bloque="${segment}"></parrafo>\n`;
         }
       }
     });
@@ -65,16 +86,45 @@ export function FileUpload() {
   ) => {
     let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xmlContent += `<relato titulo="${title}" autor="${author}">\n`;
+    //Start marking paragraphs as free
+    let gratis = 1;
 
     paragraphs.forEach((p, index) => {
+      if (index < 2) return; // Skip the first two paragraphs (title and author)
       let text = p.innerHTML;
+      // Remove double spaces
+      text = text.replace(/\s+/g, " ");
       // Remove strong tags
       text = text.replace(/<\/?strong>/g, "");
       // Replace <i> and <em> tags with Android format
       text = text.replace(/<(i|em)>(.*?)<\/(i|em)>/g, "*C*$2*C*");
 
+      //if end of free text mark occurs, remove it and change the free paragraph to false
+      if (text.includes("***")) {
+        text = text.replace("***", "");
+        gratis = 0;
+      }
+
+      const regex = /^img\s+(.+?)\s+(.+?)$/;
+      const match = text.match(regex);
+
+      //Handle images (img nombre_imagen bloque)
+      if (match) {
+        xmlContent += "  <parrafo> ";
+        xmlContent += "<just>c</just> ";
+        xmlContent += "<cap>0</cap> ";
+        xmlContent += "<saltolinea>2</saltolinea> ";
+        xmlContent += "<sangria>0</sangria> ";
+        xmlContent += "<font>imagen</font> ";
+        xmlContent += "<size>0</size> ";
+        xmlContent += `<gratis>${gratis}</gratis> `;
+        xmlContent += `<img>${match[1]}</img> `;
+        xmlContent += `<bloque>${match[2]}</bloque> `;
+        xmlContent += "</parrafo>\n>";
+      }
+
       // Handle empty paragraphs and normal text
-      if (text.trim() === "[[EMPTY_PARAGRAPH]]") {
+      else if (text.trim() === "[[EMPTY_PARAGRAPH]]") {
         xmlContent += "  <parrafo> ";
         xmlContent += "<just>i</just> ";
         xmlContent += "<cap>0</cap> ";
@@ -82,10 +132,10 @@ export function FileUpload() {
         xmlContent += "<sangria>0</sangria> ";
         xmlContent += "<font>basica</font> ";
         xmlContent += "<size>0</size> ";
-        xmlContent += "<gratis>0</gratis> ";
+        xmlContent += `<gratis>${gratis}</gratis> `;
         xmlContent += "<img>0</img> ";
         xmlContent += "<bloque> *SL* </bloque> ";
-        xmlContent += "</parrafo>\n";
+        xmlContent += "</parrafo>\n>";
       } else {
         const segment = text.trim();
         if (segment !== "") {
@@ -96,10 +146,10 @@ export function FileUpload() {
           xmlContent += "<sangria>0</sangria> ";
           xmlContent += "<font>basica</font> ";
           xmlContent += "<size>0</size> ";
-          xmlContent += `<gratis>${index < freeParagraphs ? 1 : 0}</gratis> `;
-          xmlContent += "    <img>0</img> ";
-          xmlContent += `    <bloque>${segment}</bloque> `;
-          xmlContent += "  </parrafo>\n";
+          xmlContent += `<gratis>${gratis}</gratis> `;
+          xmlContent += "<img>0</img> ";
+          xmlContent += `<bloque>${segment}</bloque> `;
+          xmlContent += "</parrafo>\n>";
         }
       }
     });
@@ -311,65 +361,6 @@ export function FileUpload() {
 
   return (
     <div className="space-y-6">
-      {/* Single File Upload */}
-      <div className="grid gap-4">
-        <div className="grid gap-2">
-          <Label htmlFor="title">Título</Label>
-          <Input
-            id="title"
-            placeholder="Introduce el título del documento"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="author">Autor</Label>
-          <Input
-            id="author"
-            placeholder="Introduce el nombre del autor"
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-          />
-        </div>
-        <div className="mt-4">
-          <TextField
-            type="number"
-            label="Número de párrafos gratis"
-            value={freeParagraphs}
-            onChange={(e) => setFreeParagraphs(Number(e.target.value))}
-            fullWidth
-            inputProps={{ min: 1, max: 10 }}
-          />
-        </div>
-      </div>
-
-      {/* Single File Upload Drop Zone */}
-      <div
-        className={`border-2 border-dashed rounded-lg p-8 transition-colors duration-200 ease-in-out ${
-          stage === "converting" ? "opacity-50" : ""
-        } hover:border-primary hover:bg-primary/5`}
-        onDragOver={handleDragOver}
-        onDrop={handleDropEvent}
-      >
-        <label
-          htmlFor="file-upload"
-          className="flex flex-col items-center justify-center space-y-4 text-center cursor-pointer"
-        >
-          <Upload className="w-12 h-12 text-muted-foreground" />
-          <span className="text-sm font-medium">
-            Arrastra y suelta o haz clic para seleccionar un archivo .docx
-          </span>
-          <input
-            type="file"
-            accept=".docx"
-            onChange={handleFileChange}
-            className="hidden"
-            id="file-upload"
-            disabled={stage === "converting"}
-          />
-        </label>
-      </div>
-
       {/* Multiple File Upload Drop Zone */}
       <div
         className={`border-2 border-dashed rounded-lg p-8 transition-colors duration-200 ease-in-out ${

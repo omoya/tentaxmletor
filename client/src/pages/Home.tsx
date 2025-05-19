@@ -82,32 +82,45 @@ export default function Home() {
                   </Dialog.Title>
                   <div className="mt-2">
                     <p className="text-sm text-gray-500">
-                      • Sube un archivo .docx para convertirlo a documentos XML.
-                      El título y el autor se extraen automáticamente del nombre
-                      del archivo si sigue este formato:{" "}
-                      <strong>titulo -- autor.docx</strong>. Si no, puedes
-                      introducirlos manualmente.
+                      • <b>Edíta en Word</b> los relatos a formatear teniendo en
+                      cuenta las siguientes instrucciones.
                     </p>
+
                     <br />
                     <p className="text-sm text-gray-500">
-                      • También puedes subir varios archivos .docx a la vez. El
-                      título y el autor se extraen automáticamente del nombre de
-                      cada archivo si sigue el formato{" "}
-                      <strong>titulo -- autor.docx</strong>. Si no, se usará el
-                      nombre del archivo como título y el autor quedará vacío.
+                      • El <b>título y el autor</b> se extraen automáticamente
+                      del primer y segundo párrafo respectivamente.
                     </p>
+
                     <br />
                     <p className="text-sm text-gray-500">
-                      • Indica el número de párrafos que se marcarán como de
-                      acceso libre. Este valor se aplicará a todos los archivos
-                      subidos.
+                      • Marca en cursiva los textos que quieras destacar.
                     </p>
+
                     <br />
                     <p className="text-sm text-gray-500">
-                      • Se descargará automáticamente un archivo ZIP que
-                      contiene los documentos XML generados. Para cada archivo
-                      .docx subido, se generarán dos XMLs: uno con el formato
-                      para iOS y otro con el formato para Android.
+                      • Incluye <b>***</b> (tres asteriscos) en el primer
+                      párrafo de contenido exclusivo para subscriptores que
+                      tenga el relato. Los párrafos anteriores se marcarán
+                      automáticamente como gratis al convertir el archivo a XML.
+                    </p>
+
+                    <br />
+                    <p className="text-sm text-gray-500">
+                      • incluye un párrafo con el texto{" "}
+                      <b>img nombre_imagen bloque</b> para cada imagen que
+                      quieras incluir en el relato. P.ej. img filigrana01-f-0-0
+                      IMG010
+                    </p>
+
+                    <br />
+                    <p className="text-sm text-gray-500">
+                      • Sube uno o varios archivos .docx editados para
+                      convertirlos a documentos XML. Automáticamente se
+                      descargará un archivo ZIP que contiene los documentos XML
+                      generados. Para cada archivo subido, se generarán dos
+                      XMLs: uno con el formato para iOS y otro con el formato
+                      para Android.
                     </p>
                   </div>
 
