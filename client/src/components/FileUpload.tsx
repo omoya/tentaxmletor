@@ -360,28 +360,39 @@ export function FileUpload() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Multiple File Upload Drop Zone */}
       <div
-        className={`border-2 border-dashed rounded-lg p-8 transition-colors duration-200 ease-in-out ${
+        className={`border-2 border-dashed rounded-2xl p-10 transition-all duration-300 ease-in-out ${
           stage === "converting" ? "opacity-50" : ""
-        } hover:border-primary hover:bg-primary/5`}
+        } ${
+          stage === "idle"
+            ? "hover:border-blue-400 hover:bg-blue-50/50 dark:hover:border-blue-600 dark:hover:bg-blue-900/10"
+            : "border-gray-200 dark:border-gray-700"
+        }`}
         onDragOver={handleDragOver}
         onDrop={handleDropEvent}
       >
         <label
           htmlFor="multi-file-upload"
-          className="flex flex-col items-center justify-center space-y-4 text-center cursor-pointer"
+          className="flex flex-col items-center justify-center space-y-6 text-center cursor-pointer"
         >
-          <Files className="w-12 h-12 text-muted-foreground" />{" "}
-          {/* Use the Files icon */}
-          <span className="text-sm font-medium">
-            Arrastra y suelta o haz clic para seleccionar varios archivos .docx
-          </span>
-          <p className="text-sm text-gray-500">
-            Puedes subir varios archivos .docx para convertirlos. El número de
-            párrafos gratis se aplicará a todos los archivos.
-          </p>
+          <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center dark:bg-blue-900/30">
+            <Files className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div className="space-y-2">
+            <span className="text-base font-medium block text-gray-800 dark:text-gray-200">
+              Arrastra y suelta o haz clic para seleccionar
+            </span>
+            <span className="text-sm text-blue-600 font-medium dark:text-blue-400">
+              archivos .docx
+            </span>
+            <p className="text-sm text-gray-500 max-w-md mx-auto mt-2 dark:text-gray-400">
+              Puedes subir varios archivos .docx para convertirlos. El título y
+              autor se extraerán del nombre del archivo si sigue el formato:{" "}
+              <strong>titulo -- autor.docx</strong>
+            </p>
+          </div>
         </label>
         <input
           type="file"
@@ -395,26 +406,51 @@ export function FileUpload() {
       </div>
 
       {stage !== "idle" && (
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm text-muted-foreground mb-1">
-            <span>{getStageMessage(stage)}</span>
-            <span>{STAGE_PROGRESS[stage]}%</span>
+        <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-100 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+          <div className="flex justify-between text-sm font-medium mb-1">
+            <span
+              className={`${
+                stage === "converting"
+                  ? "text-blue-600"
+                  : stage === "complete"
+                  ? "text-green-600"
+                  : "text-red-600"
+              } dark:text-opacity-90`}
+            >
+              {getStageMessage(stage)}
+            </span>
+            <span className="text-gray-500 dark:text-gray-400">
+              {STAGE_PROGRESS[stage]}%
+            </span>
           </div>
-          <Progress value={STAGE_PROGRESS[stage]} className="h-2" />
+          <Progress
+            value={STAGE_PROGRESS[stage]}
+            className={`h-2 ${
+              stage === "converting"
+                ? "bg-blue-100"
+                : stage === "complete"
+                ? "bg-green-100"
+                : "bg-red-100"
+            }`}
+          />
         </div>
       )}
 
       {stage === "complete" && (
-        <div className="flex items-center justify-center gap-2 text-sm text-green-600">
-          <CheckCircle className="w-4 h-4" />
-          <span>¡Conversión completada!</span>
+        <div className="flex items-center justify-center gap-3 p-4 bg-green-50 text-green-700 rounded-lg border border-green-100 dark:bg-green-900/20 dark:border-green-900/30 dark:text-green-400">
+          <CheckCircle className="w-5 h-5" />
+          <span className="font-medium">
+            ¡Conversión completada! Se ha descargado el archivo ZIP.
+          </span>
         </div>
       )}
 
       {stage === "error" && (
-        <div className="flex items-center justify-center gap-2 text-sm text-destructive">
-          <AlertCircle className="w-4 h-4" />
-          <span>Error en la conversión</span>
+        <div className="flex items-center justify-center gap-3 p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 dark:bg-red-900/20 dark:border-red-900/30 dark:text-red-400">
+          <AlertCircle className="w-5 h-5" />
+          <span className="font-medium">
+            Error en la conversión. Por favor, inténtalo de nuevo.
+          </span>
         </div>
       )}
     </div>
