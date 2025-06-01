@@ -10,16 +10,26 @@ const prepareNetlifyBuildPlugin = () => {
     closeBundle() {
       console.log("Preparing build for Netlify deployment...");
 
+      // Ensure the dist directory exists
+      const distDir = path.resolve(__dirname, "dist");
+      if (!fs.existsSync(distDir)) {
+        fs.mkdirSync(distDir, { recursive: true });
+      }
+
       // Always create _redirects file directly, without relying on file copying
-      const redirectsDestPath = path.resolve(__dirname, "dist/_redirects");
+      const redirectsDestPath = path.resolve(distDir, "_redirects");
 
       // Create _redirects file
-      fs.writeFileSync(redirectsDestPath, "/* /index.html 200");
-      console.log("✅ _redirects file created in dist");
+      try {
+        fs.writeFileSync(redirectsDestPath, "/* /index.html 200");
+        console.log("✅ _redirects file created in dist");
+      } catch (error) {
+        console.error("Failed to write _redirects file:", error);
+      }
 
       // Copy index.html to root level if it's in public subfolder
-      const publicIndexPath = path.resolve(__dirname, "dist/public/index.html");
-      const rootIndexPath = path.resolve(__dirname, "dist/index.html");
+      const publicIndexPath = path.resolve(distDir, "public/index.html");
+      const rootIndexPath = path.resolve(distDir, "index.html");
 
       if (fs.existsSync(publicIndexPath) && !fs.existsSync(rootIndexPath)) {
         fs.copyFileSync(publicIndexPath, rootIndexPath);
@@ -57,7 +67,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "dist",
+    outDir: path.resolve(__dirname, "dist"),
     emptyOutDir: true,
   },
   root: "client",
