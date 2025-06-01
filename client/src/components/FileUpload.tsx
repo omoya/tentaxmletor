@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { Upload, CheckCircle, AlertCircle, Files } from "lucide-react";
+import {
+  Upload,
+  CheckCircle,
+  AlertCircle,
+  Files,
+  FileText,
+  Loader2,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -20,6 +27,7 @@ export function FileUpload() {
   const [stage, setStage] = useState<ConversionStage>("idle");
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
+  const [processedFiles, setProcessedFiles] = useState<string[]>([]);
   const { toast } = useToast();
 
   const generateXMLForIOS = (
@@ -233,7 +241,6 @@ export function FileUpload() {
       });
     }
   };
-
   const handleMultipleFilesChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -242,12 +249,15 @@ export function FileUpload() {
 
     try {
       setStage("converting");
+      setProcessedFiles([]);
+      const fileNames: string[] = [];
 
       const zip = new JSZip();
 
       for (const file of Array.from(files)) {
         const originalFileName = file.name.replace(/\.[^/.]+$/, ""); // Remove the file extension
         const parsed = parseFileName(file.name); // Parse the file name for title and author
+        fileNames.push(originalFileName);
 
         const arrayBuffer = await file.arrayBuffer();
         const result = await mammoth.convertToHtml({ arrayBuffer });
@@ -268,6 +278,9 @@ export function FileUpload() {
 
         zip.file(`ios_${originalFileName}.xml`, iosXML);
         zip.file(`android_${originalFileName}.xml`, androidXML);
+
+        // Update processed files array
+        setProcessedFiles((prev) => [...prev, originalFileName]);
       }
 
       // Generate the ZIP file and trigger download
@@ -275,7 +288,10 @@ export function FileUpload() {
       const zipUrl = window.URL.createObjectURL(zipBlob);
       const a = document.createElement("a");
       a.href = zipUrl;
-      a.download = `converted_files.zip`;
+      a.download =
+        files.length === 1
+          ? `converted_files_${fileNames[0]}.zip`
+          : `converted_files_${new Date().toISOString().split("T")[0]}.zip`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -284,7 +300,9 @@ export function FileUpload() {
       setStage("complete");
       toast({
         title: "¡Éxito!",
-        description: `Los archivos XML han sido generados y descargados en un archivo ZIP.`,
+        description: `${files.length} ${
+          files.length === 1 ? "archivo convertido" : "archivos convertidos"
+        } y descargados en un archivo ZIP.`,
       });
     } catch (error) {
       setStage("error");
@@ -358,16 +376,19 @@ export function FileUpload() {
     };
     return messages[stage];
   };
-
   return (
     <div className="space-y-8">
       {/* Multiple File Upload Drop Zone */}
       <div
-        className={`border-2 border-dashed rounded-2xl p-10 transition-all duration-300 ease-in-out ${
-          stage === "converting" ? "opacity-50" : ""
+        className={`border-2 border-dashed rounded-2xl transition-all duration-300 ease-in-out ${
+          stage === "converting" ? "opacity-60 pointer-events-none" : ""
         } ${
           stage === "idle"
-            ? "hover:border-blue-400 hover:bg-blue-50/50 dark:hover:border-blue-600 dark:hover:bg-blue-900/10"
+            ? "hover:border-blue-400 hover:bg-blue-50/50 border-blue-200 dark:hover:border-blue-600 dark:hover:bg-blue-900/10 dark:border-blue-900/30"
+            : stage === "complete"
+            ? "border-green-300 bg-green-50/50 dark:border-green-900/30 dark:bg-green-900/10"
+            : stage === "error"
+            ? "border-red-300 bg-red-50/50 dark:border-red-900/30 dark:bg-red-900/10"
             : "border-gray-200 dark:border-gray-700"
         }`}
         onDragOver={handleDragOver}
@@ -375,23 +396,76 @@ export function FileUpload() {
       >
         <label
           htmlFor="multi-file-upload"
-          className="flex flex-col items-center justify-center space-y-6 text-center cursor-pointer"
+          className="flex flex-col items-center justify-center space-y-6 text-center cursor-pointer p-10"
         >
-          <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center dark:bg-blue-900/30">
-            <Files className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+          <div
+            className={`w-20 h-20 rounded-full flex items-center justify-center ${
+              stage === "idle"
+                ? "bg-blue-100 dark:bg-blue-900/30"
+                : stage === "converting"
+                ? "bg-amber-100 dark:bg-amber-900/30"
+                : stage === "complete"
+                ? "bg-green-100 dark:bg-green-900/30"
+                : "bg-red-100 dark:bg-red-900/30"
+            }`}
+          >
+            {stage === "idle" && (
+              <Files className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+            )}
+            {stage === "converting" && (
+              <Loader2 className="w-10 h-10 text-amber-600 dark:text-amber-400 animate-spin" />
+            )}
+            {stage === "complete" && (
+              <CheckCircle className="w-10 h-10 text-green-600 dark:text-green-400" />
+            )}
+            {stage === "error" && (
+              <AlertCircle className="w-10 h-10 text-red-600 dark:text-red-400" />
+            )}
           </div>
+
           <div className="space-y-2">
-            <span className="text-base font-medium block text-gray-800 dark:text-gray-200">
-              Arrastra y suelta o haz clic para seleccionar
+            <span
+              className={`text-lg font-medium block ${
+                stage === "idle"
+                  ? "text-gray-800 dark:text-gray-200"
+                  : stage === "converting"
+                  ? "text-amber-700 dark:text-amber-400"
+                  : stage === "complete"
+                  ? "text-green-700 dark:text-green-400"
+                  : "text-red-700 dark:text-red-400"
+              }`}
+            >
+              {stage === "idle" &&
+                "Arrastra y suelta o haz clic para seleccionar"}
+              {stage === "converting" && "Procesando archivos..."}
+              {stage === "complete" && "¡Conversión completada!"}
+              {stage === "error" && "Error en la conversión"}
             </span>
-            <span className="text-sm text-blue-600 font-medium dark:text-blue-400">
-              archivos .docx
-            </span>
-            <p className="text-sm text-gray-500 max-w-md mx-auto mt-2 dark:text-gray-400">
-              Puedes subir varios archivos .docx para convertirlos. El título y
-              autor se extraerán del nombre del archivo si sigue el formato:{" "}
-              <strong>titulo -- autor.docx</strong>
-            </p>
+
+            {stage === "idle" && (
+              <>
+                <span className="text-sm text-blue-600 font-medium dark:text-blue-400">
+                  archivos .docx
+                </span>
+                <p className="text-sm text-gray-500 max-w-md mx-auto mt-2 dark:text-gray-400">
+                  Puedes subir varios archivos .docx para convertirlos. El
+                  título y autor se extraerán del nombre del archivo si sigue el
+                  formato: <strong>titulo -- autor.docx</strong>
+                </p>
+              </>
+            )}
+
+            {stage === "complete" && (
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Haz clic para procesar más archivos
+              </p>
+            )}
+
+            {stage === "error" && (
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Inténtalo de nuevo con otros archivos
+              </p>
+            )}
           </div>
         </label>
         <input
@@ -405,52 +479,65 @@ export function FileUpload() {
         />
       </div>
 
-      {stage !== "idle" && (
-        <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-100 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+      {stage === "converting" && processedFiles.length > 0 && (
+        <div className="space-y-3 bg-white p-6 rounded-xl border border-gray-100 shadow-sm dark:bg-slate-800 dark:border-slate-700">
           <div className="flex justify-between text-sm font-medium mb-1">
-            <span
-              className={`${
-                stage === "converting"
-                  ? "text-blue-600"
-                  : stage === "complete"
-                  ? "text-green-600"
-                  : "text-red-600"
-              } dark:text-opacity-90`}
-            >
-              {getStageMessage(stage)}
+            <span className="text-amber-600 dark:text-amber-400">
+              Procesando archivos...
             </span>
             <span className="text-gray-500 dark:text-gray-400">
-              {STAGE_PROGRESS[stage]}%
+              {processedFiles.length}{" "}
+              {processedFiles.length === 1 ? "archivo" : "archivos"} procesados
             </span>
           </div>
           <Progress
             value={STAGE_PROGRESS[stage]}
-            className={`h-2 ${
-              stage === "converting"
-                ? "bg-blue-100"
-                : stage === "complete"
-                ? "bg-green-100"
-                : "bg-red-100"
-            }`}
+            className="h-2 bg-amber-100 dark:bg-amber-900/30"
           />
+
+          <div className="mt-4 space-y-2 max-h-40 overflow-y-auto">
+            {processedFiles.map((file, index) => (
+              <div
+                key={index}
+                className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300"
+              >
+                <FileText className="w-4 h-4 text-green-600 dark:text-green-400" />
+                <span>{file}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
       {stage === "complete" && (
-        <div className="flex items-center justify-center gap-3 p-4 bg-green-50 text-green-700 rounded-lg border border-green-100 dark:bg-green-900/20 dark:border-green-900/30 dark:text-green-400">
-          <CheckCircle className="w-5 h-5" />
-          <span className="font-medium">
-            ¡Conversión completada! Se ha descargado el archivo ZIP.
-          </span>
+        <div className="flex items-center p-6 bg-green-50 text-green-700 rounded-xl border border-green-100 dark:bg-green-900/20 dark:border-green-900/30 dark:text-green-400">
+          <div className="mr-4 flex-shrink-0">
+            <CheckCircle className="w-8 h-8" />
+          </div>
+          <div>
+            <h3 className="font-medium text-lg">¡Conversión completada!</h3>
+            <p className="text-sm mt-1">
+              Se ha generado y descargado un archivo ZIP con todos los XMLs
+              convertidos.
+              {processedFiles.length > 0 &&
+                ` Se procesaron ${processedFiles.length} archivos.`}
+            </p>
+          </div>
         </div>
       )}
 
       {stage === "error" && (
-        <div className="flex items-center justify-center gap-3 p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 dark:bg-red-900/20 dark:border-red-900/30 dark:text-red-400">
-          <AlertCircle className="w-5 h-5" />
-          <span className="font-medium">
-            Error en la conversión. Por favor, inténtalo de nuevo.
-          </span>
+        <div className="flex items-center p-6 bg-red-50 text-red-700 rounded-xl border border-red-100 dark:bg-red-900/20 dark:border-red-900/30 dark:text-red-400">
+          <div className="mr-4 flex-shrink-0">
+            <AlertCircle className="w-8 h-8" />
+          </div>
+          <div>
+            <h3 className="font-medium text-lg">Error en la conversión</h3>
+            <p className="text-sm mt-1">
+              Ha ocurrido un error al procesar los archivos. Por favor,
+              comprueba que los archivos son válidos e inténtalo de nuevo.
+            </p>
+          </div>
         </div>
       )}
     </div>
