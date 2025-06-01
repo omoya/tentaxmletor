@@ -10,21 +10,12 @@ const prepareNetlifyBuildPlugin = () => {
     closeBundle() {
       console.log("Preparing build for Netlify deployment...");
 
-      // Copy _redirects file
-      const redirectsSourcePath = path.resolve(
-        __dirname,
-        "client/public/_redirects"
-      );
+      // Always create _redirects file directly, without relying on file copying
       const redirectsDestPath = path.resolve(__dirname, "dist/_redirects");
 
-      if (fs.existsSync(redirectsSourcePath)) {
-        fs.copyFileSync(redirectsSourcePath, redirectsDestPath);
-        console.log("✅ _redirects file copied to dist");
-      } else {
-        // Create _redirects file if it doesn't exist
-        fs.writeFileSync(redirectsDestPath, "/* /index.html 200");
-        console.log("✅ _redirects file created in dist");
-      }
+      // Create _redirects file
+      fs.writeFileSync(redirectsDestPath, "/* /index.html 200");
+      console.log("✅ _redirects file created in dist");
 
       // Copy index.html to root level if it's in public subfolder
       const publicIndexPath = path.resolve(__dirname, "dist/public/index.html");
