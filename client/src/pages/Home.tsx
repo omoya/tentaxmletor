@@ -11,6 +11,7 @@ import {
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"ios" | "android">("ios");
 
   function closeModal() {
     setIsModalOpen(false);
@@ -40,58 +41,101 @@ export default function Home() {
       </header>
 
       <div className="max-w-4xl mx-auto pt-16">
-        {/* Hero Section */}
-        <div className="mb-12 text-center py-16">
-          <div className="inline-block mb-4 px-6 py-2 bg-blue-100 rounded-full text-blue-800 text-sm font-medium dark:bg-blue-900/40 dark:text-blue-300">
-            Conversión DOCX a XML
-          </div>
-          <h1 className="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent drop-shadow-sm mb-6">
-            Tentaxmletor
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8 dark:text-gray-300">
-            Conversor de documentos Word a XML para plataformas iOS con soporte
-            para múltiples archivos.
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-4 mb-8">
-            <div className="flex items-center space-x-2 bg-white px-4 py-3 rounded-lg shadow-sm border border-gray-100 dark:bg-slate-800 dark:border-slate-700">
-              <DocumentTextIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              <span className="text-gray-700 dark:text-gray-200">
-                Archivos .docx
-              </span>
-            </div>
-            <div className="flex items-center space-x-2 bg-white px-4 py-3 rounded-lg shadow-sm border border-gray-100 dark:bg-slate-800 dark:border-slate-700">
-              <ArrowPathIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              <span className="text-gray-700 dark:text-gray-200">
-                Conversión instantánea
-              </span>
-            </div>
-            <div className="flex items-center space-x-2 bg-white px-4 py-3 rounded-lg shadow-sm border border-gray-100 dark:bg-slate-800 dark:border-slate-700">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-5 h-5 text-blue-600 dark:text-blue-400"
-              >
-                <path d="M20.9 18.55l-8-15.98a1 1 0 0 0-1.8 0l-8 15.98a1 1 0 0 0 .9 1.45h16a1 1 0 0 0 .9-1.45" />
-              </svg>
-              <span className="text-gray-700 dark:text-gray-200">
-                Formato iOS/Android
-              </span>
-            </div>
+        {/* Tabs header */}
+        <div className="mb-6 rounded-2xl bg-white/80 dark:bg-slate-900/80 p-2 shadow-sm border border-gray-100 dark:border-slate-800">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveTab("ios")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === "ios"
+                  ? "bg-white dark:bg-slate-800 shadow-sm text-gray-900 dark:text-white"
+                  : "text-gray-600 hover:text-blue-600"
+              }`}
+            >
+              iOS
+            </button>
+            <button
+              onClick={() => setActiveTab("android")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === "android"
+                  ? "bg-white dark:bg-slate-800 shadow-sm text-gray-900 dark:text-white"
+                  : "text-gray-600 hover:text-blue-600"
+              }`}
+            >
+              Android
+            </button>
           </div>
         </div>
 
-        {/* File Upload Section */}
-        <Card className="shadow-xl border-0 rounded-2xl overflow-hidden backdrop-blur-sm bg-white/90 dark:bg-slate-800/90 dark:border-slate-700">
-          <CardContent className="p-10">
-            <FileUpload />
-          </CardContent>
-        </Card>
+        {/* Tab panels */}
+        {activeTab === "ios" && (
+          <>
+            {/* Hero Section (iOS) */}
+            <div className="mb-12 text-center py-16">
+              <div className="inline-block mb-4 px-6 py-2 bg-blue-100 rounded-full text-blue-800 text-sm font-medium dark:bg-blue-900/40 dark:text-blue-300">
+                Conversión DOCX a XML
+              </div>
+              <h1 className="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent drop-shadow-sm mb-6">
+                Tentaxmletor
+              </h1>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8 dark:text-gray-300">
+                Conversor de documentos Word a XML para plataformas iOS con
+                soporte para múltiples archivos.
+              </p>
+
+              <div className="flex flex-wrap justify-center gap-4 mb-8">
+                <div className="flex items-center space-x-2 bg-white px-4 py-3 rounded-lg shadow-sm border border-gray-100 dark:bg-slate-800 dark:border-slate-700">
+                  <DocumentTextIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <span className="text-gray-700 dark:text-gray-200">
+                    Archivos .docx
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2 bg-white px-4 py-3 rounded-lg shadow-sm border border-gray-100 dark:bg-slate-800 dark:border-slate-700">
+                  <ArrowPathIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <span className="text-gray-700 dark:text-gray-200">
+                    Conversión instantánea
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2 bg-white px-4 py-3 rounded-lg shadow-sm border border-gray-100 dark:bg-slate-800 dark:border-slate-700">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-5 h-5 text-blue-600 dark:text-blue-400"
+                  >
+                    <path d="M20.9 18.55l-8-15.98a1 1 0 0 0-1.8 0l-8 15.98a1 1 0 0 0 .9 1.45h16a1 1 0 0 0 .9-1.45" />
+                  </svg>
+                  <span className="text-gray-700 dark:text-gray-200">
+                    Formato iOS
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* File Upload Section (iOS) */}
+            <Card className="shadow-xl border-0 rounded-2xl overflow-hidden backdrop-blur-sm bg-white/90 dark:bg-slate-800/90 dark:border-slate-700">
+              <CardContent className="p-10">
+                <FileUpload />
+              </CardContent>
+            </Card>
+          </>
+        )}
+
+        {activeTab === "android" && (
+          <div className="p-10 rounded-2xl bg-white/90 dark:bg-slate-800/90 border border-gray-100 dark:border-slate-700 shadow-sm">
+            <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
+              Android - Generador (pendiente)
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Aquí irá la interfaz para generar XML formateado para Android. Se
+              añadirá más adelante.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Footer */}
