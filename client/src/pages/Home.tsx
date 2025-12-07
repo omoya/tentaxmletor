@@ -49,6 +49,13 @@ export default function Home() {
       const zip = new JSZip();
 
       const transformIOSxmlToAndroid = (xmlText: string) => {
+        // Normalize accidental extra spaces between attributes inside <parrafo> tags
+        // e.g. `<parrafo attr="1"  attr2="2"   attr3="3">` -> single spaces
+        xmlText = xmlText.replace(/<parrafo\s+([^>]*?)>/g, (_, attrs) => {
+          const normalized = attrs.replace(/\s+/g, " ").trim();
+          return `<parrafo ${normalized}>`;
+        });
+
         // Normalize whitespace
         const parser = new DOMParser();
         const doc = parser.parseFromString(xmlText, "application/xml");
