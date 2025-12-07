@@ -90,6 +90,8 @@ export default function Home() {
             /\s*\*C\*\s*([^*]+?)\s*\*C\*\s*(?=\.|\S)/,
             "*C*$1*C*"
           );
+          // Also collapse spaces before *C* when followed by "> (palabra *C* "> -> palabra*C*">")
+          bloque = bloque.replace(/(\S)\s*\*C\*\s*">/g, '$1*C*">');
 
           // Trim but keep internal spacing
           bloque = bloque.trim();
