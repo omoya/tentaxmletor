@@ -87,85 +87,6 @@ export function FileUpload() {
     return xmlContent;
   };
 
-  const generateXMLForAndroid = (
-    paragraphs: NodeListOf<Element>,
-    title: string,
-    author: string
-  ) => {
-    let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xmlContent += `<relato titulo="${title}" autor="${author}">\n`;
-    //Start marking paragraphs as free
-    let gratis = 1;
-
-    paragraphs.forEach((p, index) => {
-      if (index < 2) return; // Skip the first two paragraphs (title and author)
-      let text = p.innerHTML;
-      // Remove double spaces
-      text = text.replace(/\s+/g, " ");
-      // Remove strong tags
-      text = text.replace(/<\/?strong>/g, "");
-      // Replace <i> and <em> tags with Android format
-      text = text.replace(/<(i|em)>(.*?)<\/(i|em)>/g, "*C*$2*C*");
-
-      //if end of free text mark occurs, remove it and change the free paragraph to false
-      if (text.includes("***")) {
-        text = text.replace("***", "");
-        gratis = 0;
-      }
-
-      const regex = /^img\s+(.+?)\s+(.+?)$/;
-      const match = text.match(regex);
-
-      //Handle images (img nombre_imagen bloque)
-      if (match) {
-        xmlContent += "  <parrafo> ";
-        xmlContent += "<just>c</just> ";
-        xmlContent += "<cap>0</cap> ";
-        xmlContent += "<saltolinea>2</saltolinea> ";
-        xmlContent += "<sangria>0</sangria> ";
-        xmlContent += "<font>imagen</font> ";
-        xmlContent += "<size>0</size> ";
-        xmlContent += `<gratis>${gratis}</gratis> `;
-        xmlContent += `<img>${match[1]}</img> `;
-        xmlContent += `<bloque>${match[2]}</bloque> `;
-        xmlContent += "</parrafo>\n>";
-      }
-
-      // Handle empty paragraphs and normal text
-      else if (text.trim() === "[[EMPTY_PARAGRAPH]]") {
-        xmlContent += "  <parrafo> ";
-        xmlContent += "<just>i</just> ";
-        xmlContent += "<cap>0</cap> ";
-        xmlContent += "<saltolinea>0</saltolinea> ";
-        xmlContent += "<sangria>0</sangria> ";
-        xmlContent += "<font>basica</font> ";
-        xmlContent += "<size>0</size> ";
-        xmlContent += `<gratis>${gratis}</gratis> `;
-        xmlContent += "<img>0</img> ";
-        xmlContent += "<bloque> *SL* </bloque> ";
-        xmlContent += "</parrafo>\n>";
-      } else {
-        const segment = text.trim();
-        if (segment !== "") {
-          xmlContent += "  <parrafo> ";
-          xmlContent += "<just>i</just> ";
-          xmlContent += "<cap>0</cap> ";
-          xmlContent += "<saltolinea>0</saltolinea> ";
-          xmlContent += "<sangria>0</sangria> ";
-          xmlContent += "<font>basica</font> ";
-          xmlContent += "<size>0</size> ";
-          xmlContent += `<gratis>${gratis}</gratis> `;
-          xmlContent += "<img>0</img> ";
-          xmlContent += `<bloque>${segment}</bloque> `;
-          xmlContent += "</parrafo>\n>";
-        }
-      }
-    });
-
-    xmlContent += "</relato>";
-    return xmlContent;
-  };
-
   const parseFileName = (fileName: string) => {
     const match = fileName.match(/^(.+)--(.+)\.docx$/);
     if (match) {
@@ -204,16 +125,10 @@ export function FileUpload() {
         parsed?.title || title,
         parsed?.author || author
       );
-      const androidXML = generateXMLForAndroid(
-        paragraphs,
-        parsed?.title || title,
-        parsed?.author || author
-      );
 
-      // Create a ZIP file
+      // Create a ZIP file containing only the iOS XML
       const zip = new JSZip();
       zip.file(`ios_${originalFileName}.xml`, iosXML);
-      zip.file(`android_${originalFileName}.xml`, androidXML);
 
       // Generate the ZIP file and trigger download
       const zipBlob = await zip.generateAsync({ type: "blob" });
@@ -270,14 +185,8 @@ export function FileUpload() {
           parsed?.title || originalFileName, // Use parsed title or fallback to file name
           parsed?.author || "" // Use parsed author or fallback to empty string
         );
-        const androidXML = generateXMLForAndroid(
-          paragraphs,
-          parsed?.title || originalFileName,
-          parsed?.author || ""
-        );
 
         zip.file(`ios_${originalFileName}.xml`, iosXML);
-        zip.file(`android_${originalFileName}.xml`, androidXML);
 
         // Update processed files array
         setProcessedFiles((prev) => [...prev, originalFileName]);

@@ -49,8 +49,8 @@ export default function Home() {
             Tentaxmletor
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8 dark:text-gray-300">
-            Conversor de documentos Word a XML para plataformas iOS y Android
-            con soporte para múltiples archivos.
+            Conversor de documentos Word a XML para plataformas iOS con soporte
+            para múltiples archivos.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-8">
@@ -193,8 +193,8 @@ export default function Home() {
                       </h4>
                       <p className="text-sm text-gray-700 dark:text-gray-300">
                         • Sube uno o varios archivos .docx para convertirlos a
-                        documentos XML. Para cada archivo, se generarán dos
-                        XMLs: uno con formato para iOS y otro para Android.
+                        documentos XML. Para cada archivo, se generará un XML
+                        formateado para iOS.
                       </p>
                       <p className="text-sm text-gray-700 mt-2 dark:text-gray-300">
                         • Automáticamente se descargará un archivo ZIP que
