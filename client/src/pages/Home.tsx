@@ -85,9 +85,9 @@ export default function Home() {
 
           // Preserve special marker ' *SL* ' as is.
           // Convert Apple pseudo markers ' *C* palabra *C* palabra' and ' *C* palabra *C* .' into Android markers '*C*palabra*C* palabra' and '*C*palabra*C*.'
-          // Only collapse the first pair of *C* markers
+          // Only collapse the first pair of *C* markers for various cases
           bloque = bloque.replace(
-            /\s*\*C\*\s*([^*]+?)\s*\*C\*\s*(?=\.|\S)/,
+            /\s*\*C\*\s*([^*]+?)\s*\*C\*\s*(?=\.\*SL\*|\*SL\*|\.|\S)/,
             "*C*$1*C*"
           );
           // Also collapse spaces before *C* when followed by "> (palabra *C* "> -> palabra*C*">")
