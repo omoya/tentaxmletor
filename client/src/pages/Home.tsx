@@ -8,11 +8,15 @@ import {
   DocumentTextIcon,
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
+import { useToast } from "@/hooks/use-toast";
+import JSZip from "jszip";
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"ios" | "android">("ios");
   const [androidFiles, setAndroidFiles] = useState<File[]>([]);
+  const { toast } = useToast();
+  const [processingAndroid, setProcessingAndroid] = useState(false);
 
   const handleAndroidFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -37,6 +41,53 @@ export default function Home() {
   function openModal() {
     setIsModalOpen(true);
   }
+
+  const handleProcessAndroid = async () => {
+    if (androidFiles.length === 0) return;
+    try {
+      setProcessingAndroid(true);
+      const zip = new JSZip();
+
+      for (const f of androidFiles) {
+        const originalName = f.name
+          .replace(/\.[^/.]+$/, "")
+          .replace("ios_", "");
+        const content = await f.text();
+        // For now just copy content unchanged but save with android_ prefix
+        zip.file(`android_${originalName}.xml`, content);
+      }
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const zipUrl = window.URL.createObjectURL(zipBlob);
+      const a = document.createElement("a");
+      a.href = zipUrl;
+      a.download =
+        androidFiles.length === 1
+          ? `converted_android_${androidFiles[0].name.replace(
+              /\.[^/.]+$/,
+              ""
+            )}.zip`
+          : `converted_android_${new Date().toISOString().split("T")[0]}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(zipUrl);
+
+      toast({
+        title: "¡Éxito!",
+        description: `${androidFiles.length} archivo(s) preparados y descargados en ZIP.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Error procesando archivos",
+        variant: "destructive",
+      });
+    } finally {
+      setProcessingAndroid(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-6 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/30">
@@ -221,7 +272,8 @@ export default function Home() {
                         <DocumentTextIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                       </div>
                       <div className="mt-4 text-sm text-gray-700 dark:text-gray-300">
-                        Arrastra y suelta o haz clic para seleccionar archivos .xml
+                        Arrastra y suelta o haz clic para seleccionar archivos
+                        .xml
                       </div>
                       <input
                         id="android-xml-upload"
@@ -260,14 +312,17 @@ export default function Home() {
                   <div className="mt-6 text-right">
                     <button
                       type="button"
-                      disabled={androidFiles.length === 0}
+                      onClick={handleProcessAndroid}
+                      disabled={androidFiles.length === 0 || processingAndroid}
                       className={`inline-flex items-center justify-center rounded-lg px-6 py-3 text-sm font-medium text-white ${
-                        androidFiles.length === 0
+                        androidFiles.length === 0 || processingAndroid
                           ? "bg-blue-300 cursor-not-allowed"
                           : "bg-blue-600 hover:bg-blue-700"
                       }`}
                     >
-                      Procesar a Android (pendiente)
+                      {processingAndroid
+                        ? "Procesando..."
+                        : "Procesar a Android"}
                     </button>
                   </div>
                 </div>
