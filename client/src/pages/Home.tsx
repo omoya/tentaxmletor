@@ -12,6 +12,23 @@ import {
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"ios" | "android">("ios");
+  const [androidFiles, setAndroidFiles] = useState<File[]>([]);
+
+  const handleAndroidFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    setAndroidFiles(Array.from(files));
+  };
+
+  const handleAndroidDrop = (files: FileList) => {
+    if (!files || files.length === 0) return;
+    setAndroidFiles(Array.from(files));
+  };
+
+  const handleAndroidDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
   function closeModal() {
     setIsModalOpen(false);
@@ -126,14 +143,88 @@ export default function Home() {
         )}
 
         {activeTab === "android" && (
-          <div className="p-10 rounded-2xl bg-white/90 dark:bg-slate-800/90 border border-gray-100 dark:border-slate-700 shadow-sm">
-            <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
-              Android - Generador (pendiente)
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Aquí irá la interfaz para generar XML formateado para Android. Se
-              añadirá más adelante.
-            </p>
+          <div>
+            <div className="p-10 rounded-2xl bg-white/90 dark:bg-slate-800/90 border border-gray-100 dark:border-slate-700 shadow-sm">
+              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
+                Android - Generador (paso 2)
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Sube aquí los archivos XML para iOS que hayas editado
+                manualmente. Estos XML serán usados para generar la versión con
+                formato Android.
+              </p>
+
+              <div
+                onDragOver={handleAndroidDragOver}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleAndroidDrop(e.dataTransfer.files);
+                }}
+                className={`mt-6 border-2 border-dashed rounded-2xl transition-all p-8 text-center ${
+                  androidFiles.length === 0
+                    ? "hover:border-blue-400 hover:bg-blue-50/50 border-blue-200 dark:hover:border-blue-600 dark:hover:bg-blue-900/10 dark:border-blue-900/30"
+                    : "border-gray-200 dark:border-gray-700"
+                }`}
+              >
+                <label
+                  htmlFor="android-xml-upload"
+                  className="flex flex-col items-center cursor-pointer"
+                >
+                  <div className="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                    <DocumentTextIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="mt-4 text-sm text-gray-700 dark:text-gray-300">
+                    Arrastra y suelta o haz clic para seleccionar archivos .xml
+                  </div>
+                  <input
+                    id="android-xml-upload"
+                    type="file"
+                    accept=".xml"
+                    multiple
+                    onChange={handleAndroidFilesChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {androidFiles.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  <div className="text-sm text-gray-600 dark:text-gray-300 font-medium">
+                    Archivos seleccionados:
+                  </div>
+                  <div className="max-h-40 overflow-y-auto space-y-1">
+                    {androidFiles.map((f, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between px-4 py-2 bg-white rounded-md border border-gray-100 dark:bg-slate-900 dark:border-slate-700"
+                      >
+                        <span className="text-sm text-gray-800 dark:text-gray-200">
+                          {f.name}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {(f.size / 1024).toFixed(1)} KB
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-6 text-right">
+                <button
+                  type="button"
+                  disabled={androidFiles.length === 0}
+                  className={`inline-flex items-center justify-center rounded-lg px-6 py-3 text-sm font-medium text-white ${
+                    androidFiles.length === 0
+                      ? "bg-blue-300 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  }`}
+                >
+                  Procesar a Android (pendiente)
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
