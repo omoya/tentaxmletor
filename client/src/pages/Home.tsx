@@ -104,6 +104,18 @@ export default function Home() {
           // Convert font value 'basica3' to 'basica2'
           let fontOut = font === "basica3" ? "basica2" : font;
 
+          // Transform saltolinea: if >1, set to 2; if ==2, set to 1
+          let saltolineaOut = saltolinea;
+          const saltolineaNum = parseInt(saltolinea, 10);
+          if (!isNaN(saltolineaNum)) {
+            if (saltolineaNum > 1) {
+              saltolineaOut = "2";
+            }
+            if (saltolineaNum === 2) {
+              saltolineaOut = "1";
+            }
+          }
+
           // Build the android-style parrafo line with tabs as shown in spec
           // Use one tab at start and single spaces between tags
           const lineParts = [];
@@ -117,7 +129,7 @@ export default function Home() {
             lineParts.push(` <just>${just}</just>`);
           }
           lineParts.push(` <cap>${cap}</cap>`);
-          lineParts.push(` <saltolinea>${saltolinea}</saltolinea>`);
+          lineParts.push(` <saltolinea>${saltolineaOut}</saltolinea>`);
           lineParts.push(` <sangria>${sangria}</sangria>`);
           lineParts.push(` <font>${fontOut}</font>`);
           lineParts.push(` <size>${size}</size>`);
