@@ -54,7 +54,8 @@ export function convertIOSXmlToAndroid(xmlText: string): string | null {
       "$1*C*$2*C*"
     );
 
-    bloque = bloque.trim();
+    // preserve bloque verbatim (do not trim leading/trailing spaces)
+    // bloque = bloque.trim();
 
     // font conversion
     const fontOut = font === "basica3" ? "basica2" : font;
@@ -74,14 +75,9 @@ export function convertIOSXmlToAndroid(xmlText: string): string | null {
     // Build line parts
     const lineParts: string[] = [];
     lineParts.push("\t<parrafo>");
-
-    if (just === "c" || just === "d") {
-      const SPACES_190 = " ".repeat(190);
-      lineParts.push(` <just>${SPACES_190}${just}</just>`);
-    } else {
-      lineParts.push(` <just>${just}</just>`);
-    }
-
+    // do not prefix SPACES_190 inside <just>; keep the value verbatim
+    lineParts.push(` <just>${just}</just>`);
+    
     lineParts.push(` <cap>${cap}</cap>`);
     lineParts.push(` <saltolinea>${saltolineaOut}</saltolinea>`);
     lineParts.push(` <sangria>${sangria}</sangria>`);
@@ -90,7 +86,7 @@ export function convertIOSXmlToAndroid(xmlText: string): string | null {
     lineParts.push(` <gratis>${gratis}</gratis>`);
     lineParts.push(` <img>${imgOut}</img>`);
     lineParts.push(` <bloque>${bloque}</bloque></parrafo>`);
-
+    
     out += lineParts.join("") + "\n";
   });
 
