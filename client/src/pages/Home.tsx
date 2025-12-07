@@ -138,8 +138,8 @@ export default function Home() {
           let imgOut =
             img === "imagen_pruebas_barra_f-0-0" ? "filigrana00-f-0-0" : img;
           lineParts.push(` <img>${imgOut}</img>`);
-          // Add some spacing before bloque to match example formatting
-          lineParts.push(` \t <bloque>${bloque}</bloque></parrafo>`);
+          // Add a single space before <bloque> to match spec
+          lineParts.push(` <bloque>${bloque}</bloque></parrafo>`);
 
           out += lineParts.join("") + "\n";
         });
