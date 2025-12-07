@@ -39,23 +39,21 @@ export function convertIOSXmlToAndroid(xmlText: string): string | null {
     const img = p.getAttribute("img") || "0";
     let bloque = p.getAttribute("bloque") || "";
 
-    // Marker conversions
-    bloque = bloque.replace(
-      /(\*SL\*\s*)\*C\*\s*([^*]+?)\s*\*C\*/g,
-      "$1*C*$2*C*"
-    );
-    bloque = bloque.replace(
-      /\s*\*C\*\s*([^*]+?)\s*\*C\*\s*(?=\.\*SL\*|\*SL\*|\.|\S)/,
-      "*C*$1*C*"
-    );
-    bloque = bloque.replace(/(\S)\s*\*C\*\s*">/g, '$1*C*">');
-    bloque = bloque.replace(
-      /(\*SL\*\s*)\*C\*\s*([^*]+?)\s*\*C\*/g,
-      "$1*C*$2*C*"
-    );
+    // Normalize spacing around paired *C* markers while preserving inner text.
+    // Add a single space before/after the whole pair only when the surrounding
+    // characters are not already whitespace.
+    function normalizeCMarkers(s: string) {
+      return s.replace(/\*C\*\s*([\s\S]*?)\s*\*C\*/g, (m, inner, offset, str) => {
+        const before = str[offset - 1] || "";
+        const after = str[offset + m.length] || "";
+        const leftSpace = before && !/\s/.test(before) ? " " : "";
+        const rightSpace = after && !/\s/.test(after) ? " " : "";
+        return `${leftSpace}*C*${inner}*C*${rightSpace}`;
+      });
+    }
 
-    // preserve bloque verbatim (do not trim leading/trailing spaces)
-    // bloque = bloque.trim();
+    bloque = normalizeCMarkers(bloque);
+    // preserve bloque verbatim otherwise (do not trim)
 
     // font conversion
     const fontOut = font === "basica3" ? "basica2" : font;
