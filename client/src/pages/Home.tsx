@@ -48,13 +48,90 @@ export default function Home() {
       setProcessingAndroid(true);
       const zip = new JSZip();
 
+      const transformIOSxmlToAndroid = (xmlText: string) => {
+        // Normalize whitespace
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(xmlText, "application/xml");
+
+        // If parsing error, fallback to original content
+        if (doc.getElementsByTagName("parsererror").length) {
+          return null;
+        }
+
+        const relato = doc.querySelector("relato");
+        if (!relato) return null;
+
+        // Extract title/author from <datos> (attributes in iOS xml)
+        const datos = relato.querySelector("datos");
+        const titulo = datos?.getAttribute("titulo") || "";
+        const autor = datos?.getAttribute("autor") || "";
+
+        let out = '<?xml version="1.0" encoding="utf-8"?>\n';
+        out += `<relato titulo="${titulo}" autor="${autor}">\n\n`;
+
+        const pars = relato.querySelectorAll("parrafo");
+        pars.forEach((p) => {
+          // read attributes
+          const just = p.getAttribute("just") || "";
+          const cap = p.getAttribute("cap") || "";
+          const saltolinea = p.getAttribute("saltolinea") || "";
+          const sangria = p.getAttribute("sangria") || "";
+          const font = p.getAttribute("font") || "";
+          const size = p.getAttribute("size") || "";
+          const gratis = p.getAttribute("gratis") || "";
+          const img = p.getAttribute("img") || "0";
+          // bloque might be an attribute or nested text
+          let bloque = p.getAttribute("bloque") || "";
+
+          // Preserve special marker ' *SL* ' as is.
+          // Convert Apple pseudo markers ' *C* some *C* ' into Android markers'*C*some*C*'
+          // Remove extra surrounding spaces around *C* markers
+          bloque = bloque.replace(/\s*\*C\*\s*(.*?)\s*\*C\*\s*/g, "*C*$1*C*");
+
+          // Trim but keep internal spacing
+          bloque = bloque.trim();
+
+          // Build the android-style parrafo line with tabs as shown in spec
+          // Use one tab at start and single spaces between tags
+          const lineParts = [];
+          lineParts.push("\t<parrafo>");
+          lineParts.push(` <just>${just}</just>`);
+          lineParts.push(` <cap>${cap}</cap>`);
+          lineParts.push(` <saltolinea>${saltolinea}</saltolinea>`);
+          lineParts.push(` <sangria>${sangria}</sangria>`);
+          lineParts.push(` <font>${font}</font>`);
+          lineParts.push(` <size>${size}</size>`);
+          lineParts.push(` <gratis>${gratis}</gratis>`);
+          lineParts.push(` <img>${img}</img>`);
+          // Add some spacing before bloque to match example formatting
+          lineParts.push(` \t <bloque>${bloque}</bloque></parrafo>`);
+
+          out += lineParts.join("") + "\n";
+        });
+
+        out += "\n</relato>";
+        return out;
+      };
+
       for (const f of androidFiles) {
-        const originalName = f.name
-          .replace(/\.[^/.]+$/, "")
-          .replace("ios_", "");
-        const content = await f.text();
-        // For now just copy content unchanged but save with android_ prefix
-        zip.file(`android_${originalName}.xml`, content);
+        try {
+          const originalName = f.name
+            .replace(/\.[^/.]+$/, "")
+            .replace("ios_", "");
+          const content = await f.text();
+          const transformed = transformIOSxmlToAndroid(content);
+          if (transformed) {
+            zip.file(`android_${originalName}.xml`, transformed);
+          } else {
+            // if transform failed, include original content but still rename
+            zip.file(`android_${originalName}.xml`, content);
+          }
+        } catch (e) {
+          // include original content on error
+          const originalName = f.name.replace(/\.[^/.]+$/, "");
+          const content = await f.text();
+          zip.file(`android_${originalName}.xml`, content);
+        }
       }
 
       const zipBlob = await zip.generateAsync({ type: "blob" });
