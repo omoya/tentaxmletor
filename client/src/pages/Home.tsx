@@ -105,7 +105,14 @@ export default function Home() {
           // Use one tab at start and single spaces between tags
           const lineParts = [];
           lineParts.push("\t<parrafo>");
-          lineParts.push(` <just>${just}</just>`);
+          // If just is 'c' or 'd', prepend 190 spaces
+          if (just === "c" || just === "d") {
+            const SPACES_190 = " ".repeat(190);
+            // Prepend to just value
+            lineParts.push(` <just>${SPACES_190}${just}</just>`);
+          } else {
+            lineParts.push(` <just>${just}</just>`);
+          }
           lineParts.push(` <cap>${cap}</cap>`);
           lineParts.push(` <saltolinea>${saltolinea}</saltolinea>`);
           lineParts.push(` <sangria>${sangria}</sangria>`);
