@@ -52,7 +52,7 @@ export default function Home() {
                   : "text-gray-600 hover:text-blue-600"
               }`}
             >
-              iOS
+              PASO 1-Conversor iOS
             </button>
             <button
               onClick={() => setActiveTab("android")}
@@ -62,7 +62,7 @@ export default function Home() {
                   : "text-gray-600 hover:text-blue-600"
               }`}
             >
-              Android
+              PASO 2- Conversor Android
             </button>
           </div>
         </div>
