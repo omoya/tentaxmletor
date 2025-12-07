@@ -101,6 +101,9 @@ export default function Home() {
           // Trim but keep internal spacing
           bloque = bloque.trim();
 
+          // Convert font value 'basica3' to 'basica2'
+          let fontOut = font === "basica3" ? "basica2" : font;
+
           // Build the android-style parrafo line with tabs as shown in spec
           // Use one tab at start and single spaces between tags
           const lineParts = [];
@@ -116,7 +119,7 @@ export default function Home() {
           lineParts.push(` <cap>${cap}</cap>`);
           lineParts.push(` <saltolinea>${saltolinea}</saltolinea>`);
           lineParts.push(` <sangria>${sangria}</sangria>`);
-          lineParts.push(` <font>${font}</font>`);
+          lineParts.push(` <font>${fontOut}</font>`);
           lineParts.push(` <size>${size}</size>`);
           lineParts.push(` <gratis>${gratis}</gratis>`);
           lineParts.push(` <img>${img}</img>`);
