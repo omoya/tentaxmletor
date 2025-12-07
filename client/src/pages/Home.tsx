@@ -84,9 +84,9 @@ export default function Home() {
           let bloque = p.getAttribute("bloque") || "";
 
           // Preserve special marker ' *SL* ' as is.
-          // Convert Apple pseudo markers ' *C* some *C* ' into Android markers'*C*some*C*'
-          // Remove extra surrounding spaces around *C* markers
-          bloque = bloque.replace(/\s*\*C\*\s*(.*?)\s*\*C\*\s*/g, "*C*$1*C*");
+          // Convert Apple pseudo markers ' *C* palabra *C* palabra' into Android markers '*C*palabra*C* palabra'
+          // Only collapse the first pair of *C* markers
+          bloque = bloque.replace(/\s*\*C\*\s*([^*]+?)\s*\*C\*\s*/, "*C*$1*C*");
 
           // Trim but keep internal spacing
           bloque = bloque.trim();
