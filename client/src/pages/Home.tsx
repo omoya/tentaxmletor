@@ -122,7 +122,10 @@ export default function Home() {
           lineParts.push(` <font>${fontOut}</font>`);
           lineParts.push(` <size>${size}</size>`);
           lineParts.push(` <gratis>${gratis}</gratis>`);
-          lineParts.push(` <img>${img}</img>`);
+          // Convert img value 'imagen_pruebas_barra_f-0-0' to 'filigrana00-f-0-0'
+          let imgOut =
+            img === "imagen_pruebas_barra_f-0-0" ? "filigrana00-f-0-0" : img;
+          lineParts.push(` <img>${imgOut}</img>`);
           // Add some spacing before bloque to match example formatting
           lineParts.push(` \t <bloque>${bloque}</bloque></parrafo>`);
 
