@@ -10,6 +10,10 @@ import {
 } from "@heroicons/react/24/outline";
 import { useToast } from "@/hooks/use-toast";
 import JSZip from "jszip";
+import {
+  normalizeParrafoAttributes,
+  convertIOSXmlToAndroid,
+} from "@/lib/xmlTransforms";
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,112 +52,9 @@ export default function Home() {
       setProcessingAndroid(true);
       const zip = new JSZip();
 
-      const transformIOSxmlToAndroid = (xmlText: string) => {
-        // Normalize accidental extra spaces between attributes inside <parrafo> tags
-        // e.g. `<parrafo attr="1"  attr2="2"   attr3="3">` -> single spaces
-        xmlText = xmlText.replace(/<parrafo\s+([^>]*?)>/g, (_, attrs) => {
-          const normalized = attrs.replace(/\s+/g, " ").trim();
-          return `<parrafo ${normalized}>`;
-        });
-
-        // Normalize whitespace
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(xmlText, "application/xml");
-
-        // If parsing error, fallback to original content
-        if (doc.getElementsByTagName("parsererror").length) {
-          return null;
-        }
-
-        const relato = doc.querySelector("relato");
-        if (!relato) return null;
-
-        // Extract title/author from <datos> (attributes in iOS xml)
-        const datos = relato.querySelector("datos");
-        const titulo = datos?.getAttribute("titulo") || "";
-        const autor = datos?.getAttribute("autor") || "";
-
-        let out = '<?xml version="1.0" encoding="utf-8"?>\n';
-        out += `<relato titulo="${titulo}" autor="${autor}">\n\n`;
-
-        const pars = relato.querySelectorAll("parrafo");
-        pars.forEach((p) => {
-          // read attributes
-          const just = p.getAttribute("just") || "";
-          const cap = p.getAttribute("cap") || "";
-          const saltolinea = p.getAttribute("saltolinea") || "";
-          const sangria = p.getAttribute("sangria") || "";
-          const font = p.getAttribute("font") || "";
-          const size = p.getAttribute("size") || "";
-          const gratis = p.getAttribute("gratis") || "";
-          const img = p.getAttribute("img") || "0";
-          // bloque might be an attribute or nested text
-          let bloque = p.getAttribute("bloque") || "";
-
-          // Preserve special marker ' *SL* ' as is.
-          // Convert Apple pseudo markers ' *C* palabra *C* palabra' and ' *C* palabra *C* .' into Android markers '*C*palabra*C* palabra' and '*C*palabra*C*.'
-          // Collapse *C* markers after *SL* (e.g. '*SL*  *C* palabra *C*' -> '*SL* *C*palabra*C*')
-          bloque = bloque.replace(
-            /(\*SL\*\s*)\*C\*\s*([^*]+?)\s*\*C\*/g,
-            "$1*C*$2*C*"
-          );
-          // Only collapse the first pair of *C* markers for various cases
-          bloque = bloque.replace(
-            /\s*\*C\*\s*([^*]+?)\s*\*C\*\s*(?=\.\*SL\*|\*SL\*|\.||\S)/,
-            "*C*$1*C*"
-          );
-          // Also collapse spaces before *C* when followed by "> (palabra *C* "> -> palabra*C*">")
-          bloque = bloque.replace(/(\S)\s*\*C\*\s*">/g, '$1*C*">');
-
-          // Trim but keep internal spacing
-          bloque = bloque.trim();
-
-          // Convert font value 'basica3' to 'basica2'
-          let fontOut = font === "basica3" ? "basica2" : font;
-
-          // Transform saltolinea: if >1, set to 2; if ==2, set to 1
-          let saltolineaOut = saltolinea;
-          const saltolineaNum = parseInt(saltolinea, 10);
-          if (!isNaN(saltolineaNum)) {
-            if (saltolineaNum > 1) {
-              saltolineaOut = "2";
-            }
-            if (saltolineaNum === 2) {
-              saltolineaOut = "1";
-            }
-          }
-
-          // Build the android-style parrafo line with tabs as shown in spec
-          // Use one tab at start and single spaces between tags
-          const lineParts = [];
-          lineParts.push("\t<parrafo>");
-          // If just is 'c' or 'd', prepend 190 spaces
-          if (just === "c" || just === "d") {
-            const SPACES_190 = " ".repeat(190);
-            // Prepend to just value
-            lineParts.push(` <just>${SPACES_190}${just}</just>`);
-          } else {
-            lineParts.push(` <just>${just}</just>`);
-          }
-          lineParts.push(` <cap>${cap}</cap>`);
-          lineParts.push(` <saltolinea>${saltolineaOut}</saltolinea>`);
-          lineParts.push(` <sangria>${sangria}</sangria>`);
-          lineParts.push(` <font>${fontOut}</font>`);
-          lineParts.push(` <size>${size}</size>`);
-          lineParts.push(` <gratis>${gratis}</gratis>`);
-          // Convert img value 'imagen_pruebas_barra_f-0-0' to 'filigrana00-f-0-0'
-          let imgOut =
-            img === "imagen_pruebas_barra_f-0-0" ? "filigrana00-f-0-0" : img;
-          lineParts.push(` <img>${imgOut}</img>`);
-          // Add a single space before <bloque> to match spec
-          lineParts.push(` <bloque>${bloque}</bloque></parrafo>`);
-
-          out += lineParts.join("") + "\n";
-        });
-
-        out += "\n</relato>";
-        return out;
-      };
+      // use helper conversion
+      const transformIOSxmlToAndroid = (xmlText: string) =>
+        convertIOSXmlToAndroid(xmlText);
 
       for (const f of androidFiles) {
         try {
