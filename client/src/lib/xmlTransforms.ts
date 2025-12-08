@@ -43,17 +43,19 @@ export function convertIOSXmlToAndroid(xmlText: string): string | null {
     // Add a single space before/after the whole pair only when the surrounding
     // characters are not already whitespace.
     function normalizeCMarkers(s: string) {
-      return s.replace(/\*C\*\s*([\s\S]*?)\s*\*C\*/g, (m, inner, offset, str) => {
-        const before = str[offset - 1] || "";
-        const after = str[offset + m.length] || "";
-        const leftSpace = before && !/\s/.test(before) ? " " : "";
-        const rightSpace = after && !/\s/.test(after) ? " " : "";
-        return `${leftSpace}*C*${inner}*C*${rightSpace}`;
-      });
+      return s.replace(
+        /\*C\*\s*([\s\S]*?)\s*\*C\*/g,
+        (m, inner, offset, str) => {
+          const before = str[offset - 1] || "";
+          const after = str[offset + m.length] || "";
+          const leftSpace = before && !/\s/.test(before) ? " " : "";
+          const rightSpace = after && !/\s/.test(after) ? " " : "";
+          return `${leftSpace}*C*${inner}*C*${rightSpace}`;
+        }
+      );
     }
 
     bloque = normalizeCMarkers(bloque);
-  
 
     // font conversion
     const fontOut = font === "basica3" ? "basica2" : font;
@@ -67,12 +69,12 @@ export function convertIOSXmlToAndroid(xmlText: string): string | null {
     }
 
     // justificacion
-    const initialSpaces= (just=== 'c' || just ==='d') && img!=='0'?' '.repeat(190):'' 
+    const initialSpaces =
+      (just === "c" || just === "d") && img === "0" ? " ".repeat(190) : "";
 
     // img conversion
     const imgOut =
       img === "imagen_pruebas_barra_f-0-0" ? "filigrana00-f-0-0" : img;
-
 
     // Build line parts
     const lineParts: string[] = [];
@@ -85,8 +87,13 @@ export function convertIOSXmlToAndroid(xmlText: string): string | null {
     lineParts.push(` <size>${size}</size>`);
     lineParts.push(` <gratis>${gratis}</gratis>`);
     lineParts.push(` <img>${imgOut}</img> 		  `);
-    lineParts.push(`<bloque>${initialSpaces}${bloque}</bloque></parrafo>`.replace('<bloque> *C*','<bloque>*C*').replace('*C* .','*C*.').replace('*C* ”','*C*”'));
-    
+    lineParts.push(
+      `<bloque>${initialSpaces}${bloque}</bloque></parrafo>`
+        .replace("<bloque> *C*", "<bloque>*C*")
+        .replace("*C* .", "*C*.")
+        .replace("*C* ”", "*C*”")
+    );
+
     out += lineParts.join("") + "\n";
   });
 
