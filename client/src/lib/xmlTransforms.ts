@@ -67,7 +67,7 @@ export function convertIOSXmlToAndroid(xmlText: string): string | null {
     }
 
     // justificacion
-    const initialSpaces= (just=== 'c' || just ==='d') && img==='0'?' '.repeat(190):'' 
+    const initialSpaces= (just=== 'c' || just ==='d') && img!=='0'?' '.repeat(190):'' 
 
     // img conversion
     const imgOut =
