@@ -91,6 +91,7 @@ export function convertIOSXmlToAndroid(xmlText: string): string | null {
       `<bloque>${initialSpaces}${bloque}</bloque></parrafo>`
         .replace("<bloque> *C*", "<bloque>*C*")
         .replace("*C* .", "*C*.")
+        .replace("*C* ,", "*C*,")
         .replace("*C* ”", "*C*”")
     );
 
