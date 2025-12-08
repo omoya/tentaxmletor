@@ -53,7 +53,7 @@ export function convertIOSXmlToAndroid(xmlText: string): string | null {
     }
 
     bloque = normalizeCMarkers(bloque);
-    // preserve bloque verbatim otherwise (do not trim)
+  
 
     // font conversion
     const fontOut = font === "basica3" ? "basica2" : font;
@@ -66,6 +66,8 @@ export function convertIOSXmlToAndroid(xmlText: string): string | null {
       if (saltolineaNum === 2) saltolineaOut = "1";
     }
 
+    // justificacion
+    const _190Spaces= ' '.repeat(190) 
     // img conversion
     const imgOut =
       img === "imagen_pruebas_barra_f-0-0" ? "filigrana00-f-0-0" : img;
@@ -73,17 +75,15 @@ export function convertIOSXmlToAndroid(xmlText: string): string | null {
     // Build line parts
     const lineParts: string[] = [];
     lineParts.push("\t<parrafo>");
-    // do not prefix SPACES_190 inside <just>; keep the value verbatim
     lineParts.push(` <just>${just}</just>`);
-    
     lineParts.push(` <cap>${cap}</cap>`);
     lineParts.push(` <saltolinea>${saltolineaOut}</saltolinea>`);
     lineParts.push(` <sangria>${sangria}</sangria>`);
     lineParts.push(` <font>${fontOut}</font>`);
     lineParts.push(` <size>${size}</size>`);
     lineParts.push(` <gratis>${gratis}</gratis>`);
-    lineParts.push(` <img>${imgOut}</img>`);
-    lineParts.push(` <bloque>${bloque}</bloque></parrafo>`);
+    lineParts.push(` <img>${imgOut}</img> 		  `);
+    lineParts.push(`<bloque>${(just=== 'c' || just ==='d')??_190Spaces}${bloque}</bloque></parrafo>`.replace('<bloque> *C*','<bloque>*C*').replace('*C* .','*C*.').replace('*C* ”','*C*”'));
     
     out += lineParts.join("") + "\n";
   });
