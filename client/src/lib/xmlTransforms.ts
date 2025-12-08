@@ -67,10 +67,12 @@ export function convertIOSXmlToAndroid(xmlText: string): string | null {
     }
 
     // justificacion
-    const _190Spaces= ' '.repeat(190) 
+    const initialSpaces= (just=== 'c' || just ==='d') && img==='0'?' '.repeat(190):'' 
+
     // img conversion
     const imgOut =
       img === "imagen_pruebas_barra_f-0-0" ? "filigrana00-f-0-0" : img;
+
 
     // Build line parts
     const lineParts: string[] = [];
@@ -83,7 +85,7 @@ export function convertIOSXmlToAndroid(xmlText: string): string | null {
     lineParts.push(` <size>${size}</size>`);
     lineParts.push(` <gratis>${gratis}</gratis>`);
     lineParts.push(` <img>${imgOut}</img> 		  `);
-    lineParts.push(`<bloque>${(just=== 'c' || just ==='d')??_190Spaces}${bloque}</bloque></parrafo>`.replace('<bloque> *C*','<bloque>*C*').replace('*C* .','*C*.').replace('*C* ”','*C*”'));
+    lineParts.push(`<bloque>${initialSpaces}${bloque}</bloque></parrafo>`.replace('<bloque> *C*','<bloque>*C*').replace('*C* .','*C*.').replace('*C* ”','*C*”'));
     
     out += lineParts.join("") + "\n";
   });
